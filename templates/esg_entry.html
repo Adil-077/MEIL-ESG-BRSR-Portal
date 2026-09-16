@@ -124,7 +124,7 @@
             {% for m in metrics %}
               {% set entry = values.get(m.code) %}
               {% set readonly_rollup = (not is_bu) and m.get('rollup') %}
-              <div class="row metric-row align-items-center">
+              <div class="row metric-row align-items-center" id="metric-{{ m.code }}">
                 <div class="col-md-5">
                   {{ m.name }}
                   {% if entry and entry.is_consolidated %}<span class="badge bg-primary consolidated-badge ms-1">Consolidated</span>{% endif %}
@@ -179,13 +179,65 @@
 
 {% block scripts %}
 <script>
-// Re-open the tab that was last active if the URL has a #section-X hash (after a save redirect)
 document.addEventListener('DOMContentLoaded', function () {
+
   const hash = window.location.hash;
-  if (hash) {
-    const trigger = document.querySelector(`[data-bs-target="${hash}"]`);
-    if (trigger) new bootstrap.Tab(trigger).show();
+
+  if (!hash) return;
+
+  // Investigating a specific ESG metric
+  if (hash.startsWith('#metric-')) {
+
+    // Open Section C
+    const sectionCTab =
+      document.querySelector('[data-bs-target="#section-C"]');
+
+    if (sectionCTab) {
+      new bootstrap.Tab(sectionCTab).show();
+    }
+
+    // Wait for Section C to become visible
+    setTimeout(function () {
+
+      const metric =
+        document.querySelector(hash);
+
+      if (metric) {
+
+        metric.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+
+        // Temporarily highlight the metric
+        metric.style.transition =
+          'box-shadow 0.3s ease, background-color 0.3s ease';
+
+        metric.style.boxShadow =
+          '0 0 0 3px rgba(13, 110, 253, 0.35)';
+
+        metric.style.backgroundColor =
+          'rgba(13, 110, 253, 0.06)';
+
+        setTimeout(function () {
+          metric.style.boxShadow = '';
+          metric.style.backgroundColor = '';
+        }, 4000);
+      }
+
+    }, 300);
+
+    return;
   }
+
+  // Existing behavior for #section-A, #section-B, #section-C
+  const trigger =
+    document.querySelector(`[data-bs-target="${hash}"]`);
+
+  if (trigger) {
+    new bootstrap.Tab(trigger).show();
+  }
+
 });
 </script>
 {% endblock %}

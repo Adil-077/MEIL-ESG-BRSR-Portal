@@ -28,6 +28,7 @@ from utils.metrics_catalog import (
 from utils.validation import validate_batch
 from utils.audit import log_action
 from utils.consolidation import consolidate_org
+from utils.analytics import get_completeness, get_yoy_anomalies
 from utils.export_pdf import build_pdf_report
 from utils.export_excel import build_excel_report
 
@@ -157,55 +158,153 @@ def dashboard():
 @app.route("/api/dashboard-data")
 @login_required
 def api_dashboard_data():
+
     org_id = request.args.get("org_id", type=int)
     period_id = request.args.get("period_id", type=int)
+
     if org_id not in current_user.accessible_org_ids():
         abort(403)
 
     period = ReportingPeriod.query.get_or_404(period_id)
-    prior_period = (ReportingPeriod.query
-                     .filter(ReportingPeriod.start_date < period.start_date)
-                     .order_by(ReportingPeriod.start_date.desc()).first())
+
+    prior_period = (
+        ReportingPeriod.query
+        .filter(ReportingPeriod.start_date < period.start_date)
+        .order_by(ReportingPeriod.start_date.desc())
+        .first()
+    )
 
     def pillar_totals(pid):
         totals = {"E": 0.0, "S": 0.0, "G": 0.0}
-        rows = ESGData.query.filter_by(org_id=org_id, period_id=pid, section="C").all()
+
+        rows = ESGData.query.filter_by(
+            org_id=org_id,
+            period_id=pid,
+            section="C"
+        ).all()
+
         for r in rows:
             principle = r.principle
             pillar = PILLAR_MAP.get(principle)
+
             val = r.numeric_value()
             metric = get_metric(r.metric_code)
-            if pillar and val is not None and metric and metric.get("data_type") != "percentage":
+
+            if (
+                pillar
+                and val is not None
+                and metric
+                and metric.get("data_type") != "percentage"
+            ):
                 totals[pillar] += val
+
         return totals
 
+    # ---------------------------------------------------------
+    # E / S / G PILLAR TOTALS
+    # ---------------------------------------------------------
+
     current_totals = pillar_totals(period_id)
-    prior_totals = pillar_totals(prior_period.id) if prior_period else {"E": 0, "S": 0, "G": 0}
 
-    # Key headline metrics for KPI cards + trend chart
-    headline_codes = ["C_P6_GHG", "C_P6_ENERGY", "C_P6_WATER", "C_P8_CSR_SPEND"]
+    prior_totals = (
+        pillar_totals(prior_period.id)
+        if prior_period
+        else {"E": 0, "S": 0, "G": 0}
+    )
+
+    # ---------------------------------------------------------
+    # KEY HEADLINE METRICS
+    # ---------------------------------------------------------
+
+    headline_codes = [
+        "C_P6_GHG",
+        "C_P6_ENERGY",
+        "C_P6_WATER",
+        "C_P8_CSR_SPEND"
+    ]
+
     headline = {}
-    for code in headline_codes:
-        row = ESGData.query.filter_by(org_id=org_id, period_id=period_id, metric_code=code).first()
-        headline[code] = row.numeric_value() if row and row.numeric_value() is not None else 0
 
-    all_periods = ReportingPeriod.query.order_by(ReportingPeriod.start_date).all()
+    for code in headline_codes:
+        row = ESGData.query.filter_by(
+            org_id=org_id,
+            period_id=period_id,
+            metric_code=code
+        ).first()
+
+        headline[code] = (
+            row.numeric_value()
+            if row and row.numeric_value() is not None
+            else 0
+        )
+
+    # ---------------------------------------------------------
+    # GHG YEAR-ON-YEAR TREND
+    # ---------------------------------------------------------
+
+    all_periods = (
+        ReportingPeriod.query
+        .order_by(ReportingPeriod.start_date)
+        .all()
+    )
+
     trend_labels = [p.name for p in all_periods]
+
     trend_ghg = []
+
     for p in all_periods:
-        row = ESGData.query.filter_by(org_id=org_id, period_id=p.id, metric_code="C_P6_GHG").first()
-        trend_ghg.append(row.numeric_value() if row and row.numeric_value() is not None else 0)
+
+        row = ESGData.query.filter_by(
+            org_id=org_id,
+            period_id=p.id,
+            metric_code="C_P6_GHG"
+        ).first()
+
+        trend_ghg.append(
+            row.numeric_value()
+            if row and row.numeric_value() is not None
+            else 0
+        )
+
+    # ---------------------------------------------------------
+    # ESG INTELLIGENCE
+    # ---------------------------------------------------------
+
+    completeness = get_completeness(
+        org_id,
+        period_id
+    )
+
+    anomalies = get_yoy_anomalies(
+        org_id,
+        period_id
+    )
+
+    # ---------------------------------------------------------
+    # FINAL DASHBOARD RESPONSE
+    # ---------------------------------------------------------
 
     return jsonify({
+
+        # Existing dashboard data
         "pillar_current": current_totals,
         "pillar_prior": prior_totals,
-        "prior_period_name": prior_period.name if prior_period else None,
+        "prior_period_name": (
+            prior_period.name
+            if prior_period
+            else None
+        ),
+
         "headline": headline,
+
         "trend_labels": trend_labels,
         "trend_ghg": trend_ghg,
+
+        # New ESG Intelligence
+        "completeness": completeness,
+        "anomalies": anomalies,
+
     })
-
-
 # ---------------------------------------------------------------------------
 # Hierarchy management
 # ---------------------------------------------------------------------------
