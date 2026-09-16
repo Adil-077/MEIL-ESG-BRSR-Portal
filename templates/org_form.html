@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Add Organization{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-plus me-2 text-meil"></i>Add Organization</h5>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Organization Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Org Code</label>
+            <input type="text" name="code" class="form-control" placeholder="e.g. BU-PROJECT01" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Organization Type</label>
+            <select name="org_type" class="form-select" required>
+              {% if current_user.role != 'SUBSIDIARY_ADMIN' %}
+              <option value="SUBSIDIARY">Subsidiary</option>
+              {% endif %}
+              <option value="BUSINESS_UNIT">Business Unit / Project</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Parent Organization</label>
+            <select name="parent_id" class="form-select">
+              {% for p in possible_parents %}
+                <option value="{{ p.id }}">{{ p.name }} ({{ p.org_type.replace('_',' ').title() }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control">
+          </div>
+          <div class="d-flex justify-content-between">
+            <a href="{{ url_for('hierarchy') }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-meil-primary">Create Organization</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

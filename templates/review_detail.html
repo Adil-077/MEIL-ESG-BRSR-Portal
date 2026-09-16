@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Review — {{ org.name }}{% endblock %}
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="fw-bold mb-0">{{ org.name }}</h4>
+    <p class="text-muted mb-0">{{ period.name }} &bull; <span class="badge status-badge status-{{ submission.status|lower }}">{{ submission.status }}</span></p>
+  </div>
+  <a href="{{ url_for('review_dashboard') }}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Back to Queue</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold">Section A — General Disclosures</h6>
+        {% for m in section_a %}
+          {% set entry = values.get(m.code) %}
+          <div class="row metric-row"><div class="col-md-7">{{ m.name }}</div><div class="col-md-5">{{ entry.value if entry else '—' }}</div></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold">Section B — Policy Coverage</h6>
+        {% for m in section_b %}
+          {% set entry = values.get(m.code) %}
+          <div class="row metric-row"><div class="col-md-9">{{ m.name }}</div><div class="col-md-3">{{ entry.value if entry else '—' }}</div></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold">Section C — Performance Metrics</h6>
+        {% for principle_code, principle_name in principles.items() %}
+          {% set metrics = section_c|selectattr('principle','equalto', principle_code)|list %}
+          {% if metrics %}
+          <div class="fw-semibold text-meil mt-2">{{ principle_code }}: {{ principle_name }}</div>
+          {% for m in metrics %}
+            {% set entry = values.get(m.code) %}
+            <div class="row metric-row">
+              <div class="col-md-7">{{ m.name }}{% if entry and entry.is_consolidated %}<span class="badge bg-primary consolidated-badge ms-1">Consolidated</span>{% endif %}</div>
+              <div class="col-md-3">{{ entry.value if entry else '—' }}</div>
+              <div class="col-md-2 text-muted small">{{ m.get('unit','') }}</div>
+            </div>
+          {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Review Actions</h6>
+
+        {% if submission.status == 'SUBMITTED' %}
+          <form method="POST" action="{{ url_for('review_start', submission_id=submission.id) }}">
+            <button class="btn btn-meil-primary w-100"><i class="fa-solid fa-magnifying-glass me-1"></i>Start Review</button>
+          </form>
+        {% elif submission.status == 'UNDER_REVIEW' %}
+          <form method="POST" action="{{ url_for('review_decision', submission_id=submission.id) }}">
+            <div class="mb-2">
+              <label class="form-label small">Review Comment</label>
+              <textarea name="comment" class="form-control form-control-sm" rows="3" placeholder="Required if rejecting"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" name="action" value="approve" class="btn btn-success flex-fill"><i class="fa-solid fa-check me-1"></i>Verify</button>
+              <button type="submit" name="action" value="reject" class="btn btn-danger flex-fill"><i class="fa-solid fa-xmark me-1"></i>Reject</button>
+            </div>
+          </form>
+        {% elif submission.status == 'VERIFIED' and current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN'] %}
+          <form method="POST" action="{{ url_for('review_final_approve', submission_id=submission.id) }}">
+            <div class="mb-2">
+              <label class="form-label small">Approval Comment (optional)</label>
+              <textarea name="comment" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-meil-primary w-100"><i class="fa-solid fa-stamp me-1"></i>Grant Final Approval</button>
+          </form>
+        {% else %}
+          <p class="text-muted small mb-0">No further action available for this report at its current status.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if submission.reviews %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-2">History</h6>
+        {% for r in submission.reviews|reverse %}
+          <div class="small border-start ps-2 mb-2 {% if r.action == 'REJECT' %}border-danger{% else %}border-success{% endif %}">
+            <strong>{{ r.action.replace('_',' ').title() }}</strong> — {{ r.reviewer.full_name }}<br>
+            <span class="text-muted">{{ r.created_at.strftime('%d-%b-%Y %H:%M') }}</span>
+            {% if r.comment %}<br><em>&ldquo;{{ r.comment }}&rdquo;</em>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — MEIL ESG Portal{% endblock %}
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-0"><i class="fa-solid fa-gauge-high me-2 text-meil"></i>ESG Performance Dashboard</h3>
+    <p class="text-muted mb-0">Real-time BRSR disclosure status across the MEIL Group hierarchy</p>
+  </div>
+  <form class="d-flex gap-2 mt-2 mt-lg-0" method="GET">
+    <select name="org_id" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for o in orgs %}
+        <option value="{{ o.id }}" {% if selected_org and o.id == selected_org.id %}selected{% endif %}>
+          {{ '— ' if o.org_type=='SUBSIDIARY' else '—— ' if o.org_type=='BUSINESS_UNIT' else '' }}{{ o.name }}
+        </option>
+      {% endfor %}
+    </select>
+    <select name="period_id" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for p in periods %}
+        <option value="{{ p.id }}" {% if selected_period and p.id == selected_period.id %}selected{% endif %}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% if selected_org and selected_period %}
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="card kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Selected Entity</div>
+        <div class="fw-bold">{{ selected_org.name }}</div>
+        <span class="badge bg-secondary-subtle text-dark">{{ selected_org.org_type.replace('_',' ').title() }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Report Status ({{ selected_period.name }})</div>
+        <div class="fw-bold">
+          <span class="badge status-badge status-{{ (submission.status if submission else 'draft')|lower }}">
+            {{ submission.status if submission else 'DRAFT' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Period Status</div>
+        <div class="fw-bold">{{ selected_period.status }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Pending Reviews (Group-wide)</div>
+        <div class="fw-bold fs-5">{{ pending_reviews }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('esg_entry', org_id=selected_org.id, period_id=selected_period.id) }}" class="btn btn-meil-primary btn-sm">
+        <i class="fa-solid fa-pen-to-square me-1"></i>Open BRSR Disclosure Form
+      </a>
+      <a href="{{ url_for('export_pdf', org_id=selected_org.id, period_id=selected_period.id) }}" class="btn btn-outline-danger btn-sm">
+        <i class="fa-solid fa-file-pdf me-1"></i>Export PDF
+      </a>
+      <a href="{{ url_for('export_excel', org_id=selected_org.id, period_id=selected_period.id) }}" class="btn btn-outline-success btn-sm">
+        <i class="fa-solid fa-file-excel me-1"></i>Export Excel
+      </a>
+      {% if selected_org.org_type != 'BUSINESS_UNIT' and current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN','SUBSIDIARY_ADMIN'] %}
+      <form method="POST" action="{{ url_for('consolidate', org_id=selected_org.id, period_id=selected_period.id) }}">
+        <button class="btn btn-outline-primary btn-sm" type="submit">
+          <i class="fa-solid fa-arrows-to-dot me-1"></i>Run Consolidation
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">E / S / G Pillar Contribution — {{ selected_period.name }}</h6>
+        <canvas id="pillarChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">GHG Emissions — Year-on-Year Trend (tCO2e)</h6>
+        <canvas id="trendChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">YoY Comparison — E / S / G</h6>
+        <canvas id="yoyChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Headline KPIs</h6>
+        <div class="row text-center g-3" id="headlineKpis">
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded kpi-tile">
+              <div class="small text-muted">GHG Emissions</div>
+              <div class="fs-5 fw-bold" id="kpi-ghg">—</div>
+              <div class="small text-muted">tCO2e</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded kpi-tile">
+              <div class="small text-muted">Energy Consumption</div>
+              <div class="fs-5 fw-bold" id="kpi-energy">—</div>
+              <div class="small text-muted">GJ</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded kpi-tile">
+              <div class="small text-muted">Water Withdrawal</div>
+              <div class="fs-5 fw-bold" id="kpi-water">—</div>
+              <div class="small text-muted">KL</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded kpi-tile">
+              <div class="small text-muted">CSR Spend</div>
+              <div class="fs-5 fw-bold" id="kpi-csr">—</div>
+              <div class="small text-muted">INR Lakhs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="alert alert-info">No organizations or reporting periods are available yet. Ask your Group ESG Admin to set these up.</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if selected_org and selected_period %}
+<script>
+const ORG_ID = {{ selected_org.id }};
+const PERIOD_ID = {{ selected_period.id }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endif %}
+{% endblock %}

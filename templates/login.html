@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — MEIL ESG / BRSR Portal</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="login-body d-flex align-items-center justify-content-center">
+<div class="login-card shadow-lg">
+  <div class="text-center mb-4">
+    <i class="fa-solid fa-leaf fa-2x login-icon mb-2"></i>
+    <h3 class="fw-bold mb-0">MEIL Group</h3>
+    <p class="text-muted">ESG / BRSR Reporting Portal</p>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} py-2 small">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label">Username</label>
+      <input type="text" name="username" class="form-control" required autofocus>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Password</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-meil-primary w-100">
+      <i class="fa-solid fa-right-to-bracket me-1"></i>Sign In
+    </button>
+  </form>
+
+  <hr>
+  <div class="small text-muted">
+    <strong>Demo credentials</strong> (seeded via <code>seed_data.py</code>):
+    <ul class="mb-0 ps-3">
+      <li>superadmin / Admin@123 — Super Admin</li>
+      <li>group.esg.admin / Group@123 — Group ESG Admin</li>
+      <li>infra.admin / Infra@123 — Subsidiary Admin</li>
+      <li>klip.user / Klip@123 — Business Unit User</li>
+      <li>auditor / Audit@123 — Reviewer / Auditor</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

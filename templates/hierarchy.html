@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Organization Hierarchy{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="fw-bold"><i class="fa-solid fa-sitemap me-2 text-meil"></i>Organization Hierarchy</h4>
+    <p class="text-muted mb-0">MEIL Group &rarr; Subsidiaries &rarr; Business Units / Projects</p>
+  </div>
+  {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN','SUBSIDIARY_ADMIN'] %}
+  <a href="{{ url_for('hierarchy_add') }}" class="btn btn-meil-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Organization</a>
+  {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Organization</th>
+          <th>Type</th>
+          <th>Code</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for org in orgs %}
+        <tr>
+          <td class="org-type-{{ org.org_type|lower }}">
+            {% if org.org_type == 'BUSINESS_UNIT' %}<i class="fa-solid fa-diagram-project me-1"></i>{% elif org.org_type == 'SUBSIDIARY' %}<i class="fa-solid fa-building me-1"></i>{% else %}<i class="fa-solid fa-globe me-1"></i>{% endif %}
+            {{ org.name }}
+          </td>
+          <td><span class="badge bg-light text-dark border">{{ org.org_type.replace('_',' ').title() }}</span></td>
+          <td><code>{{ org.code }}</code></td>
+          <td>{{ org.location or '-' }}</td>
+          <td>
+            {% if org.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+          </td>
+          <td class="text-end">
+            {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN','SUBSIDIARY_ADMIN'] and org.org_type != 'GROUP' %}
+            <form method="POST" action="{{ url_for('hierarchy_toggle', org_id=org.id) }}" class="d-inline">
+              <button class="btn btn-sm btn-outline-secondary">{{ 'Deactivate' if org.is_active else 'Activate' }}</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

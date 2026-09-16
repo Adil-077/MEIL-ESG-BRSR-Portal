@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Audit Trail{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fw-bold"><i class="fa-solid fa-file-shield me-2 text-meil"></i>Audit Trail</h4>
+  <form method="GET" class="d-flex gap-2">
+    <select name="entity" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Entities</option>
+      {% for e in entities %}
+        <option value="{{ e }}" {% if e == selected_entity %}selected{% endif %}>{{ e }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Entity</th><th>ID</th><th>Old Value</th><th>New Value</th></tr>
+      </thead>
+      <tbody>
+      {% for log in logs %}
+        <tr>
+          <td class="text-nowrap small">{{ log.timestamp.strftime('%d-%b-%Y %H:%M:%S') }}</td>
+          <td class="small">{{ log.user.username if log.user else 'system' }}</td>
+          <td><span class="badge bg-light text-dark border">{{ log.action }}</span></td>
+          <td class="small">{{ log.entity }}</td>
+          <td class="small">{{ log.entity_id or '-' }}</td>
+          <td class="small text-truncate" style="max-width:180px;" title="{{ log.old_value }}">{{ log.old_value or '-' }}</td>
+          <td class="small text-truncate" style="max-width:180px;" title="{{ log.new_value }}">{{ log.new_value or '-' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No audit records found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

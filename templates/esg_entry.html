@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}BRSR Disclosure — {{ org.name }}{% endblock %}
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="fw-bold mb-0">{{ org.name }}</h4>
+    <p class="text-muted mb-0">{{ period.name }} &bull; <span class="badge status-badge status-{{ submission.status|lower }}">{{ submission.status }}</span></p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('export_pdf', org_id=org.id, period_id=period.id) }}" class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
+    <a href="{{ url_for('export_excel', org_id=org.id, period_id=period.id) }}" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i>Excel</a>
+    {% if can_edit %}
+    <form method="POST" action="{{ url_for('esg_submit', org_id=org.id, period_id=period.id) }}" onsubmit="return confirm('Submit this report for review? It will be locked from further edits.');">
+      <button type="submit" class="btn btn-meil-primary btn-sm"><i class="fa-solid fa-paper-plane me-1"></i>Submit for Review</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if not can_edit %}
+<div class="alert alert-secondary py-2 small">
+  <i class="fa-solid fa-lock me-1"></i>
+  This report is currently read-only
+  {% if submission.status not in ['DRAFT','REJECTED'] %}because it has status <strong>{{ submission.status }}</strong>{% endif %}
+  {% if period.status == 'CLOSED' %}(reporting period is closed){% endif %}.
+</div>
+{% endif %}
+
+{% if submission.reviews %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="fw-bold mb-2"><i class="fa-solid fa-comments me-1"></i>Review History</h6>
+    {% for r in submission.reviews|reverse %}
+      <div class="small border-start ps-2 mb-2 {% if r.action == 'REJECT' %}border-danger{% else %}border-success{% endif %}">
+        <strong>{{ r.action.replace('_',' ').title() }}</strong> by {{ r.reviewer.full_name }} on {{ r.created_at.strftime('%d-%b-%Y %H:%M') }}
+        {% if r.comment %}<br><em>&ldquo;{{ r.comment }}&rdquo;</em>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<ul class="nav nav-pills section-nav mb-3" id="sectionTabs" role="tablist">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#section-A" type="button">Section A — General Disclosures</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#section-B" type="button">Section B — Management &amp; Process</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#section-C" type="button">Section C — Principle-wise Metrics</button></li>
+</ul>
+
+<div class="tab-content">
+
+  <!-- SECTION A -->
+  <div class="tab-pane fade show active" id="section-A">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('esg_save', org_id=org.id, period_id=period.id) }}">
+          <input type="hidden" name="section" value="A">
+          {% for m in section_a %}
+            {% set entry = values.get(m.code) %}
+            <div class="row metric-row align-items-center">
+              <div class="col-md-6">{{ m.name }}{% if m.required %}<span class="text-danger">*</span>{% endif %}</div>
+              <div class="col-md-4">
+                <input type="text" name="{{ m.code }}" class="form-control form-control-sm"
+                       value="{{ entry.value if entry else '' }}" {% if not can_edit %}disabled{% endif %}>
+              </div>
+              <div class="col-md-2 text-muted small">{{ m.get('unit','') }}</div>
+            </div>
+          {% endfor %}
+          {% if can_edit %}
+          <button type="submit" class="btn btn-meil-primary btn-sm mt-3"><i class="fa-solid fa-floppy-disk me-1"></i>Save Section A</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION B -->
+  <div class="tab-pane fade" id="section-B">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('esg_save', org_id=org.id, period_id=period.id) }}">
+          <input type="hidden" name="section" value="B">
+          {% for principle_code, principle_name in principles.items() %}
+            <h6 class="fw-bold text-meil mt-3">{{ principle_code }}: {{ principle_name }}</h6>
+            {% for m in section_b if m.principle == principle_code %}
+              {% set entry = values.get(m.code) %}
+              <div class="row metric-row align-items-center">
+                <div class="col-md-8">{{ m.name }}</div>
+                <div class="col-md-4">
+                  <select name="{{ m.code }}" class="form-select form-select-sm" {% if not can_edit %}disabled{% endif %}>
+                    <option value="">-- Select --</option>
+                    <option value="Yes" {% if entry and entry.value=='Yes' %}selected{% endif %}>Yes</option>
+                    <option value="No" {% if entry and entry.value=='No' %}selected{% endif %}>No</option>
+                  </select>
+                </div>
+              </div>
+            {% endfor %}
+          {% endfor %}
+          {% if can_edit %}
+          <button type="submit" class="btn btn-meil-primary btn-sm mt-3"><i class="fa-solid fa-floppy-disk me-1"></i>Save Section B</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION C -->
+  <div class="tab-pane fade" id="section-C">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        {% if not is_bu %}
+        <div class="alert alert-info small py-2">
+          <i class="fa-solid fa-circle-info me-1"></i>
+          Metrics marked <span class="badge bg-primary consolidated-badge">Consolidated</span> are automatically rolled up from
+          subordinate Business Units and cannot be edited manually. Use <strong>Run Consolidation</strong> on the dashboard to refresh them.
+        </div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('esg_save', org_id=org.id, period_id=period.id) }}">
+          <input type="hidden" name="section" value="C">
+          {% for principle_code, principle_name in principles.items() %}
+            {% set metrics = section_c|selectattr('principle','equalto', principle_code)|list %}
+            {% if metrics %}
+            <h6 class="fw-bold text-meil mt-3">{{ principle_code }}: {{ principle_name }}</h6>
+            {% for m in metrics %}
+              {% set entry = values.get(m.code) %}
+              {% set readonly_rollup = (not is_bu) and m.get('rollup') %}
+              <div class="row metric-row align-items-center">
+                <div class="col-md-5">
+                  {{ m.name }}
+                  {% if entry and entry.is_consolidated %}<span class="badge bg-primary consolidated-badge ms-1">Consolidated</span>{% endif %}
+                </div>
+                <div class="col-md-2">
+                  <input type="text" name="{{ m.code }}" class="form-control form-control-sm"
+                         value="{{ entry.value if entry else '' }}"
+                         {% if not can_edit or readonly_rollup %}disabled{% endif %}>
+                </div>
+                <div class="col-md-1 text-muted small">{{ m.get('unit','') }}</div>
+                <div class="col-md-4">
+                  {% if entry %}
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      {% for ev in evidences_by_esg_id.get(entry.id, []) %}
+                        <span class="badge bg-light text-dark border d-inline-flex align-items-center gap-1">
+                          <a href="{{ url_for('evidence_download', evidence_id=ev.id) }}" class="text-decoration-none text-dark">
+                            <i class="fa-solid fa-paperclip me-1"></i>{{ ev.file_name[:18] }}
+                          </a>
+                          {% if can_edit and not readonly_rollup %}
+                          <form method="POST" action="{{ url_for('evidence_delete', evidence_id=ev.id) }}" class="d-inline" onsubmit="return confirm('Remove this evidence file?');">
+                            <button type="submit" class="btn btn-sm p-0 border-0 text-danger" style="line-height:1;"><i class="fa-solid fa-xmark"></i></button>
+                          </form>
+                          {% endif %}
+                        </span>
+                      {% endfor %}
+                      {% if can_edit and not readonly_rollup %}
+                      <form method="POST" action="{{ url_for('evidence_upload') }}" enctype="multipart/form-data" class="d-inline-flex align-items-center gap-1">
+                        <input type="hidden" name="esg_data_id" value="{{ entry.id }}">
+                        <input type="file" name="file" class="form-control form-control-sm" style="max-width: 140px;">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-upload"></i></button>
+                      </form>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <span class="text-muted small">Save value first to attach evidence</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+            {% endif %}
+          {% endfor %}
+          {% if can_edit %}
+          <button type="submit" class="btn btn-meil-primary btn-sm mt-3"><i class="fa-solid fa-floppy-disk me-1"></i>Save Section C</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Re-open the tab that was last active if the URL has a #section-X hash (after a save redirect)
+document.addEventListener('DOMContentLoaded', function () {
+  const hash = window.location.hash;
+  if (hash) {
+    const trigger = document.querySelector(`[data-bs-target="${hash}"]`);
+    if (trigger) new bootstrap.Tab(trigger).show();
+  }
+});
+</script>
+{% endblock %}

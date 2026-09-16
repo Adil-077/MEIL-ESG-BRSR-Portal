@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Review Queue{% endblock %}
+{% block content %}
+
+<h4 class="fw-bold mb-3"><i class="fa-solid fa-clipboard-check me-2 text-meil"></i>Reviewer / Auditor Queue</h4>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Organization</th>
+          <th>FY Period</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for s in submissions %}
+        <tr>
+          <td>{{ s.organization.name }} <span class="badge bg-light text-dark border">{{ s.organization.org_type.replace('_',' ').title() }}</span></td>
+          <td>{{ s.period.name }}</td>
+          <td><span class="badge status-badge status-{{ s.status|lower }}">{{ s.status }}</span></td>
+          <td>{{ s.submitted_at.strftime('%d-%b-%Y') if s.submitted_at else '-' }}</td>
+          <td class="text-end">
+            <a href="{{ url_for('review_detail', submission_id=s.id) }}" class="btn btn-sm btn-outline-primary">Open</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No submissions in the review pipeline yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

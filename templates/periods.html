@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Financial Year Periods{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="fw-bold"><i class="fa-solid fa-calendar-days me-2 text-meil"></i>Financial Year / Reporting Periods</h4>
+    <p class="text-muted mb-0">Control when BRSR data entry is open, in review, or locked for each FY</p>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <table class="table align-middle">
+          <thead><tr><th>Period</th><th>Start</th><th>End</th><th>Status</th>{% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN'] %}<th class="text-end">Change Status</th>{% endif %}</tr></thead>
+          <tbody>
+          {% for p in periods %}
+            <tr>
+              <td class="fw-semibold">{{ p.name }}</td>
+              <td>{{ p.start_date.strftime('%d-%b-%Y') }}</td>
+              <td>{{ p.end_date.strftime('%d-%b-%Y') }}</td>
+              <td>
+                <span class="badge status-badge status-{{ p.status|lower }}">{{ p.status }}</span>
+              </td>
+              {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN'] %}
+              <td class="text-end">
+                <form method="POST" action="{{ url_for('periods_status', period_id=p.id) }}" class="d-inline">
+                  <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                    <option value="OPEN" {% if p.status=='OPEN' %}selected{% endif %}>Open</option>
+                    <option value="REVIEW" {% if p.status=='REVIEW' %}selected{% endif %}>Review</option>
+                    <option value="CLOSED" {% if p.status=='CLOSED' %}selected{% endif %}>Closed</option>
+                  </select>
+                </form>
+              </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN'] %}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Add New Period</h6>
+        <form method="POST" action="{{ url_for('periods_add') }}">
+          <div class="mb-3">
+            <label class="form-label">Period Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. FY 2026-27" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="start_date" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">End Date</label>
+            <input type="date" name="end_date" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-meil-primary w-100">Create Period</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

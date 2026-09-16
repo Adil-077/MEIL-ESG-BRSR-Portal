@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}MEIL ESG / BRSR Portal{% endblock %}</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<nav class="navbar navbar-expand-lg navbar-dark meil-navbar sticky-top">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">
+      <i class="fa-solid fa-leaf me-2"></i>MEIL ESG / BRSR Portal
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-gauge me-1"></i>Dashboard</a></li>
+        {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN','SUBSIDIARY_ADMIN','REVIEWER'] %}
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='hierarchy' %}active{% endif %}" href="{{ url_for('hierarchy') }}"><i class="fa-solid fa-sitemap me-1"></i>Hierarchy</a></li>
+        {% endif %}
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='periods' %}active{% endif %}" href="{{ url_for('periods') }}"><i class="fa-solid fa-calendar-days me-1"></i>FY Periods</a></li>
+        {% if current_user.role in ['REVIEWER','GROUP_ESG_ADMIN','SUPER_ADMIN'] %}
+        <li class="nav-item"><a class="nav-link {% if request.endpoint and request.endpoint.startswith('review') %}active{% endif %}" href="{{ url_for('review_dashboard') }}"><i class="fa-solid fa-clipboard-check me-1"></i>Review Queue</a></li>
+        {% endif %}
+        {% if current_user.role == 'SUPER_ADMIN' %}
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='users' %}active{% endif %}" href="{{ url_for('users') }}"><i class="fa-solid fa-users-gear me-1"></i>Users</a></li>
+        {% endif %}
+        {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN'] %}
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='audit_log' %}active{% endif %}" href="{{ url_for('audit_log') }}"><i class="fa-solid fa-file-shield me-1"></i>Audit Trail</a></li>
+        {% endif %}
+      </ul>
+      <span class="navbar-text me-3 text-light">
+        <span class="badge role-badge role-{{ current_user.role|lower }}">{{ current_user.role_label() }}</span>
+        {{ current_user.full_name }}
+      </span>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<div class="container-fluid px-4 mt-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<footer class="text-center text-muted small py-4 mt-5">
+  &copy; {{ current_year }} MEIL Group — ESG / BRSR Reporting Portal (Internal MVP)
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

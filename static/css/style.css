@@ -1,0 +1,79 @@
+:root {
+  --meil-navy: #1F3864;
+  --meil-blue: #2E75B6;
+  --meil-green: #2E7D32;
+  --meil-bg: #F4F6FA;
+}
+
+body {
+  background-color: var(--meil-bg);
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.meil-navbar {
+  background: linear-gradient(90deg, var(--meil-navy) 0%, var(--meil-blue) 100%);
+}
+
+.text-meil { color: var(--meil-navy); }
+
+.btn-meil-primary {
+  background-color: var(--meil-navy);
+  border-color: var(--meil-navy);
+  color: #fff;
+}
+.btn-meil-primary:hover {
+  background-color: var(--meil-blue);
+  border-color: var(--meil-blue);
+  color: #fff;
+}
+
+/* ---- Login page ---- */
+.login-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--meil-navy) 0%, var(--meil-blue) 100%);
+}
+.login-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 440px;
+}
+.login-icon { color: var(--meil-green); }
+
+/* ---- KPI cards ---- */
+.kpi-card { border-radius: 12px; }
+.kpi-tile { background-color: #EEF2F9; }
+
+/* ---- Role badges ---- */
+.role-badge { font-size: 0.7rem; }
+.role-super_admin { background-color: #6A1B9A; }
+.role-group_esg_admin { background-color: #1F3864; }
+.role-subsidiary_admin { background-color: #2E75B6; }
+.role-bu_user { background-color: #00796B; }
+.role-reviewer { background-color: #B71C1C; }
+
+/* ---- Workflow status badges ---- */
+.status-badge { font-size: 0.75rem; padding: 0.35em 0.7em; }
+.status-draft { background-color: #90A4AE; color: #fff; }
+.status-submitted { background-color: #FB8C00; color: #fff; }
+.status-under_review { background-color: #1E88E5; color: #fff; }
+.status-verified { background-color: #43A047; color: #fff; }
+.status-approved { background-color: #2E7D32; color: #fff; }
+.status-rejected { background-color: #C62828; color: #fff; }
+
+/* ---- Hierarchy tree ---- */
+.org-type-group { font-weight: 700; color: var(--meil-navy); }
+.org-type-subsidiary { font-weight: 600; color: var(--meil-blue); padding-left: 1.5rem; }
+.org-type-business_unit { color: #444; padding-left: 3rem; }
+
+/* ---- Section navigation on ESG entry form ---- */
+.section-nav .nav-link.active {
+  background-color: var(--meil-navy);
+  color: #fff;
+}
+
+.metric-row { border-bottom: 1px solid #eee; padding: 0.6rem 0; }
+.consolidated-badge { font-size: 0.65rem; }
+
+.card { border-radius: 12px; }
