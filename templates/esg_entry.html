@@ -137,37 +137,185 @@
                 <div class="col-md-1 text-muted small">{{ m.get('unit','') }}</div>
                 <div class="col-md-4">
                   {% if entry %}
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                      {% for ev in evidences_by_esg_id.get(entry.id, []) %}
-                        <span class="badge bg-light text-dark border d-inline-flex align-items-center gap-1">
-                          <a href="{{ url_for('evidence_download', evidence_id=ev.id) }}" class="text-decoration-none text-dark">
-                            <i class="fa-solid fa-paperclip me-1"></i>{{ ev.file_name[:18] }}
-                          </a>
-                          {% if can_edit and not readonly_rollup %}
-                          <form method="POST" action="{{ url_for('evidence_delete', evidence_id=ev.id) }}" class="d-inline" onsubmit="return confirm('Remove this evidence file?');">
-                            <button type="submit" class="btn btn-sm p-0 border-0 text-danger" style="line-height:1;"><i class="fa-solid fa-xmark"></i></button>
-                          </form>
-                          {% endif %}
-                        </span>
-                      {% endfor %}
-                      {% if can_edit and not readonly_rollup %}
-                      <form method="POST" action="{{ url_for('evidence_upload') }}" enctype="multipart/form-data" class="d-inline-flex align-items-center gap-1">
-                        <input type="hidden" name="esg_data_id" value="{{ entry.id }}">
-                        <input type="file" name="file" class="form-control form-control-sm" style="max-width: 140px;">
-                        <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-upload"></i></button>
-                      </form>
-                      {% endif %}
-                    </div>
-                  {% else %}
-                    <span class="text-muted small">Save value first to attach evidence</span>
-                  {% endif %}
-                </div>
+
+  <div class="d-flex align-items-center gap-2 flex-wrap">
+
+    {% for ev in evidences_by_esg_id.get(entry.id, []) %}
+
+      <div class="border rounded p-2 bg-light">
+
+        <!-- Evidence file -->
+        <div class="d-flex align-items-center gap-2">
+
+          <a href="{{ url_for('evidence_download', evidence_id=ev.id) }}"
+             class="text-decoration-none text-dark">
+
+            <i class="fa-solid fa-paperclip me-1"></i>
+            {{ ev.file_name[:18] }}
+
+          </a>
+
+          <!-- Verification status -->
+          {% if ev.status == "VERIFIED" %}
+
+            <span class="badge bg-success">
+              <i class="fa-solid fa-check me-1"></i>
+              Verified
+            </span>
+
+          {% elif ev.status == "REJECTED" %}
+
+            <span class="badge bg-danger">
+              <i class="fa-solid fa-xmark me-1"></i>
+              Rejected
+            </span>
+
+          {% else %}
+
+            <span class="badge bg-warning text-dark">
+              <i class="fa-solid fa-clock me-1"></i>
+              Pending
+            </span>
+
+          {% endif %}
+
+        </div>
+
+
+        <!-- Verification information -->
+        {% if ev.status == "VERIFIED" and ev.verifier %}
+
+          <div class="small text-muted mt-1">
+            Verified by {{ ev.verifier.full_name }}
+
+            {% if ev.verified_at %}
+              on {{ ev.verified_at.strftime('%d-%b-%Y %H:%M') }}
+            {% endif %}
+          </div>
+
+        {% elif ev.status == "REJECTED" %}
+
+          {% if ev.verification_comment %}
+
+            <div class="small text-danger mt-1">
+              <strong>Reason:</strong>
+              {{ ev.verification_comment }}
+            </div>
+
+          {% endif %}
+
+        {% endif %}
+
+
+       <!-- Reviewer actions -->
+{% if current_user.role in ["SUPER_ADMIN", "GROUP_ESG_ADMIN", "SUBSIDIARY_ADMIN", "REVIEWER"] %}
+
+  {% if ev.status != "VERIFIED" %}
+
+    <div class="d-flex gap-1 mt-2">
+
+      <!-- Verify -->
+      <form method="POST"
+            action="{{ url_for('evidence_verify', evidence_id=ev.id) }}">
+
+        <button type="submit"
+                class="btn btn-sm btn-outline-success">
+
+          <i class="fa-solid fa-check me-1"></i>
+          Verify
+
+        </button>
+
+      </form>
+
+      <!-- Reject -->
+      <button type="button"
+              class="btn btn-sm btn-outline-danger"
+              onclick="rejectEvidence('{{ ev.id }}')">
+
+        <i class="fa-solid fa-xmark me-1"></i>
+        Reject
+
+      </button>
+
+    </div>
+
+  {% endif %}
+
+{% endif %}
+
+        <!-- Delete evidence -->
+        {% if can_edit and not readonly_rollup %}
+
+          <form method="POST"
+                action="{{ url_for('evidence_delete', evidence_id=ev.id) }}"
+                class="mt-1"
+                onsubmit="return confirm('Remove this evidence file?');">
+
+            <button type="submit"
+                    class="btn btn-sm p-0 border-0 text-danger">
+
+              <i class="fa-solid fa-trash me-1"></i>
+              Remove
+
+            </button>
+
+          </form>
+
+        {% endif %}
+
+      </div>
+
+    {% endfor %}
+
+
+    <!-- Upload new evidence -->
+    {% if can_edit and not readonly_rollup %}
+
+      <form method="POST"
+            action="{{ url_for('evidence_upload') }}"
+            enctype="multipart/form-data"
+            class="d-inline-flex align-items-center gap-1">
+
+        <input type="hidden"
+               name="esg_data_id"
+               value="{{ entry.id }}">
+
+        <input type="file"
+               name="file"
+               class="form-control form-control-sm"
+               style="max-width: 140px;">
+
+        <button type="submit"
+                class="btn btn-sm btn-outline-secondary">
+
+          <i class="fa-solid fa-upload"></i>
+
+        </button>
+
+      </form>
+
+    {% endif %}
+
+  </div>
+
+{% else %}
+
+  <span class="text-muted small">
+    Save value first to attach evidence
+  </span>
+
+{% endif %}
+              </div>
               </div>
             {% endfor %}
             {% endif %}
           {% endfor %}
           {% if can_edit %}
-          <button type="submit" class="btn btn-meil-primary btn-sm mt-3"><i class="fa-solid fa-floppy-disk me-1"></i>Save Section C</button>
+          <button type="submit" class="btn btn-meil-primary btn-sm mt-3">
+          <i class="fa-solid fa-floppy-disk me-1"></i>
+          Save Section C
+          </button>
           {% endif %}
         </form>
       </div>
@@ -239,5 +387,27 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
 });
+function rejectEvidence(evidenceId) {
+    const comment = prompt("Enter the reason for rejecting this evidence:");
+
+    if (!comment || comment.trim() === "") {
+        alert("A rejection reason is required.");
+        return;
+    }
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/evidence/" + evidenceId + "/reject";
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "comment";
+    input.value = comment.trim();
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+
+    form.submit();
+}
 </script>
 {% endblock %}

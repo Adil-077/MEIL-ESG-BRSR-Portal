@@ -26,6 +26,7 @@ ORG_TYPES = ["GROUP", "SUBSIDIARY", "BUSINESS_UNIT"]
 PERIOD_STATUSES = ["OPEN", "REVIEW", "CLOSED"]
 
 SUBMISSION_STATUSES = ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "VERIFIED", "APPROVED", "REJECTED"]
+EVIDENCE_STATUSES = ["PENDING", "VERIFIED", "REJECTED"]
 
 
 class Organization(db.Model):
@@ -173,20 +174,67 @@ class ESGData(db.Model):
 
 
 class Evidence(db.Model):
+
     __tablename__ = "evidence"
 
     id = db.Column(db.Integer, primary_key=True)
-    esg_data_id = db.Column(db.Integer, db.ForeignKey("esg_data.id"), nullable=False)
-    file_name = db.Column(db.String(255), nullable=False)
-    stored_path = db.Column(db.String(500), nullable=False)
-    uploaded_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    uploaded_at = db.Column(db.DateTime, default=utcnow)
 
-    uploader = db.relationship("User")
+    esg_data_id = db.Column(
+        db.Integer,
+        db.ForeignKey("esg_data.id"),
+        nullable=False
+    )
+
+    file_name = db.Column(db.String(255), nullable=False)
+
+    stored_path = db.Column(db.String(500), nullable=False)
+
+    uploaded_by = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
+    uploaded_at = db.Column(
+        db.DateTime,
+        default=utcnow
+    )
+
+    # Evidence verification
+    status = db.Column(
+        db.String(20),
+        nullable=False,
+        default="PENDING"
+    )
+
+    verified_by = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
+    verified_at = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+
+    verification_comment = db.Column(
+        db.Text,
+        nullable=True
+    )
+
+    uploader = db.relationship(
+        "User",
+        foreign_keys=[uploaded_by]
+    )
+
+    verifier = db.relationship(
+        "User",
+        foreign_keys=[verified_by]
+    )
 
     def __repr__(self):
         return f"<Evidence {self.file_name}>"
-
 
 class Review(db.Model):
     """A single review action (start review / approve / reject) on a ReportSubmission."""

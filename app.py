@@ -1,4 +1,6 @@
 import os
+import uuid
+from werkzeug.utils import secure_filename
 from datetime import datetime, date
 
 from flask import (
@@ -636,67 +638,257 @@ def esg_submit(org_id, period_id):
 @login_required
 def evidence_upload():
     esg_data_id = request.form.get("esg_data_id", type=int)
-    esg_row = ESGData.query.get_or_404(esg_data_id)
-
-    if esg_row.org_id not in current_user.accessible_org_ids():
-        abort(403)
 
     file = request.files.get("file")
-    if not file or file.filename == "":
-        flash("No file selected.", "danger")
-        return redirect(url_for("esg_entry", org_id=esg_row.org_id, period_id=esg_row.period_id))
-    if not allowed_file(file.filename):
-        flash("File type not permitted.", "danger")
-        return redirect(url_for("esg_entry", org_id=esg_row.org_id, period_id=esg_row.period_id))
 
-    org_dir = os.path.join(app.config["UPLOAD_FOLDER"], str(esg_row.org_id), str(esg_row.period_id))
-    os.makedirs(org_dir, exist_ok=True)
-    filename = secure_filename(file.filename)
-    unique_name = f"{esg_row.metric_code}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{filename}"
-    full_path = os.path.join(org_dir, unique_name)
-    file.save(full_path)
+    if not esg_data_id or not file or not file.filename:
+        flash("Please select a file to upload.", "danger")
+        return redirect(request.referrer or url_for("dashboard"))
 
-    ev = Evidence(esg_data_id=esg_row.id, file_name=filename, stored_path=full_path, uploaded_by=current_user.id)
-    db.session.add(ev)
-    db.session.commit()
-    log_action(current_user.id, "UPLOAD", "Evidence", ev.id, None, filename)
-    db.session.commit()
-    flash(f"Evidence '{filename}' uploaded for {esg_row.metric_code}.", "success")
-    return redirect(url_for("esg_entry", org_id=esg_row.org_id, period_id=esg_row.period_id))
+    ev_data = ESGData.query.get_or_404(esg_data_id)
 
-
-@app.route("/evidence/<int:evidence_id>/download")
-@login_required
-def evidence_download(evidence_id):
-    ev = Evidence.query.get_or_404(evidence_id)
-    if ev.esg_data.org_id not in current_user.accessible_org_ids():
+    if ev_data.org_id not in current_user.accessible_org_ids():
         abort(403)
-    if not os.path.exists(ev.stored_path):
-        abort(404)
-    return send_file(ev.stored_path, as_attachment=True, download_name=ev.file_name)
 
+    period = ReportingPeriod.query.get_or_404(ev_data.period_id)
 
+    submission = get_or_create_submission(
+        ev_data.org_id,
+        ev_data.period_id
+    )
+
+    if (
+        current_user.role not in DATA_ENTRY_ROLES
+        or ev_data.org_id not in current_user.accessible_org_ids()
+        or period.status not in ("OPEN", "REVIEW")
+        or submission.status not in ("DRAFT", "REJECTED")
+    ):
+        abort(403)
+
+    filename = secure_filename(file.filename)
+
+    if not filename:
+        flash("Invalid file name.", "danger")
+        return redirect(
+            url_for(
+                "esg_entry",
+                org_id=ev_data.org_id,
+                period_id=ev_data.period_id
+            )
+        )
+    upload_dir = os.path.join(app.config["UPLOAD_FOLDER"], "evidence")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    stored_name = f"{uuid.uuid4().hex}_{filename}"
+    stored_path = os.path.join(upload_dir, stored_name)
+
+    file.save(stored_path)
+
+    evidence = Evidence(
+        esg_data_id=ev_data.id,
+        file_name=filename,
+        stored_path=stored_path,
+        uploaded_by=current_user.id,
+        status="PENDING"
+    )
+
+    db.session.add(evidence)
+    db.session.commit()
+
+    log_action(
+        current_user.id,
+        "UPLOAD",
+        "Evidence",
+        evidence.id,
+        None,
+        filename
+    )
+    db.session.commit()
+
+    flash("Evidence uploaded successfully.", "success")
+
+    return redirect(
+        url_for(
+            "esg_entry",
+            org_id=ev_data.org_id,
+            period_id=ev_data.period_id
+        )
+    )
 @app.route("/evidence/<int:evidence_id>/delete", methods=["POST"])
 @login_required
 def evidence_delete(evidence_id):
     ev = Evidence.query.get_or_404(evidence_id)
+
     if ev.esg_data.org_id not in current_user.accessible_org_ids():
         abort(403)
-    org_id, period_id = ev.esg_data.org_id, ev.esg_data.period_id
+
+    if current_user.role not in DATA_ENTRY_ROLES:
+        abort(403)
+
+    old_filename = ev.file_name
+
+    # Delete physical file
     if os.path.exists(ev.stored_path):
-        try:
-            os.remove(ev.stored_path)
-        except OSError:
-            pass
+        os.remove(ev.stored_path)
+
     db.session.delete(ev)
     db.session.commit()
-    log_action(current_user.id, "DELETE", "Evidence", evidence_id, ev.file_name, None)
+
+    log_action(
+        current_user.id,
+        "DELETE",
+        "Evidence",
+        evidence_id,
+        old_filename,
+        None
+    )
     db.session.commit()
-    flash("Evidence removed.", "info")
-    return redirect(url_for("esg_entry", org_id=org_id, period_id=period_id))
+
+    flash("Evidence deleted successfully.", "success")
+
+    return redirect(
+        url_for(
+            "esg_entry",
+            org_id=ev.esg_data.org_id,
+            period_id=ev.esg_data.period_id
+        )
+    )
+@app.route("/evidence/<int:evidence_id>/download")
+@login_required
+def evidence_download(evidence_id):
+    ev = Evidence.query.get_or_404(evidence_id)
+
+    if ev.esg_data.org_id not in current_user.accessible_org_ids():
+        abort(403)
+
+    if not os.path.exists(ev.stored_path):
+        flash("Evidence file not found.", "danger")
+        return redirect(
+            url_for(
+                "esg_entry",
+                org_id=ev.esg_data.org_id,
+                period_id=ev.esg_data.period_id
+            )
+        )
+
+    return send_file(
+        ev.stored_path,
+        as_attachment=True,
+        download_name=ev.file_name
+    )
+@app.route("/evidence/<int:evidence_id>/verify", methods=["POST"])
+@login_required
+def evidence_verify(evidence_id):
+
+    ev = Evidence.query.get_or_404(evidence_id)
+
+    if ev.esg_data.org_id not in current_user.accessible_org_ids():
+        abort(403)
+
+    # Only reviewers/admins can verify evidence
+    allowed_roles = [
+        "SUPER_ADMIN",
+        "GROUP_ESG_ADMIN",
+        "SUBSIDIARY_ADMIN",
+        "REVIEWER"
+    ]
+
+    if current_user.role not in allowed_roles:
+        abort(403)
+
+    old_status = ev.status
+
+    ev.status = "VERIFIED"
+    ev.verified_by = current_user.id
+    ev.verified_at = datetime.utcnow()
+    ev.verification_comment = request.form.get("comment", "").strip() or None
+
+    db.session.commit()
+
+    log_action(
+        current_user.id,
+        "VERIFY",
+        "Evidence",
+        ev.id,
+        old_status,
+        "VERIFIED"
+    )
+
+    db.session.commit()
+
+    flash("Evidence marked as verified.", "success")
+
+    return redirect(
+        url_for(
+            "esg_entry",
+            org_id=ev.esg_data.org_id,
+            period_id=ev.esg_data.period_id
+        )
+    )
 
 
-# ---------------------------------------------------------------------------
+@app.route("/evidence/<int:evidence_id>/reject", methods=["POST"])
+@login_required
+def evidence_reject(evidence_id):
+
+    ev = Evidence.query.get_or_404(evidence_id)
+
+    if ev.esg_data.org_id not in current_user.accessible_org_ids():
+        abort(403)
+
+    # Only reviewers/admins can reject evidence
+    allowed_roles = [
+        "SUPER_ADMIN",
+        "GROUP_ESG_ADMIN",
+        "SUBSIDIARY_ADMIN",
+        "REVIEWER"
+    ]
+
+    if current_user.role not in allowed_roles:
+        abort(403)
+
+    comment = request.form.get("comment", "").strip()
+
+    if not comment:
+        flash("A rejection comment is required.", "danger")
+
+        return redirect(
+            url_for(
+                "esg_entry",
+                org_id=ev.esg_data.org_id,
+                period_id=ev.esg_data.period_id
+            )
+        )
+
+    old_status = ev.status
+
+    ev.status = "REJECTED"
+    ev.verified_by = current_user.id
+    ev.verified_at = datetime.utcnow()
+    ev.verification_comment = comment
+
+    db.session.commit()
+
+    log_action(
+        current_user.id,
+        "REJECT",
+        "Evidence",
+        ev.id,
+        old_status,
+        comment
+    )
+
+    db.session.commit()
+
+    flash("Evidence rejected.", "warning")
+
+    return redirect(
+        url_for(
+            "esg_entry",
+            org_id=ev.esg_data.org_id,
+            period_id=ev.esg_data.period_id
+        )
+    )# ---------------------------------------------------------------------------
 # Review workflow
 # ---------------------------------------------------------------------------
 @app.route("/review")
