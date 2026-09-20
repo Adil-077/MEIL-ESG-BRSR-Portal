@@ -529,6 +529,7 @@ def esg_entry(org_id, period_id):
         can_edit = False
 
     evidences_by_esg_id = {r.id: r.evidences for r in rows}
+    
 
     return render_template(
         "esg_entry.html",

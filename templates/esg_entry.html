@@ -130,9 +130,11 @@
                   {% if entry and entry.is_consolidated %}<span class="badge bg-primary consolidated-badge ms-1">Consolidated</span>{% endif %}
                 </div>
                 <div class="col-md-2">
-                  <input type="text" name="{{ m.code }}" class="form-control form-control-sm"
-                         value="{{ entry.value if entry else '' }}"
-                         {% if not can_edit or readonly_rollup %}disabled{% endif %}>
+                  <input type="text"
+       name="{{ m.code }}"
+       class="form-control form-control-sm"
+       value="{{ entry.value if entry else '' }}"
+       {% if (not can_edit) or readonly_rollup %}disabled{% endif %}>
                 </div>
                 <div class="col-md-1 text-muted small">{{ m.get('unit','') }}</div>
                 <div class="col-md-4">
@@ -215,18 +217,12 @@
     <div class="d-flex gap-1 mt-2">
 
       <!-- Verify -->
-      <form method="POST"
-            action="{{ url_for('evidence_verify', evidence_id=ev.id) }}">
-
-        <button type="submit"
-                class="btn btn-sm btn-outline-success">
-
-          <i class="fa-solid fa-check me-1"></i>
-          Verify
-
-        </button>
-
-      </form>
+      <button type="button"
+        class="btn btn-sm btn-outline-success"
+        onclick="verifyEvidence('{{ ev.id }}')">
+    <i class="fa-solid fa-check me-1"></i>
+    Verify
+</button>
 
       <!-- Reject -->
       <button type="button"
@@ -247,20 +243,12 @@
         <!-- Delete evidence -->
         {% if can_edit and not readonly_rollup %}
 
-          <form method="POST"
-                action="{{ url_for('evidence_delete', evidence_id=ev.id) }}"
-                class="mt-1"
-                onsubmit="return confirm('Remove this evidence file?');">
-
-            <button type="submit"
-                    class="btn btn-sm p-0 border-0 text-danger">
-
-              <i class="fa-solid fa-trash me-1"></i>
-              Remove
-
-            </button>
-
-          </form>
+          <button type="button"
+        class="btn btn-sm p-0 border-0 text-danger mt-1"
+        onclick="deleteEvidence('{{ ev.id }}')">
+    <i class="fa-solid fa-trash me-1"></i>
+    Remove
+</button>
 
         {% endif %}
 
@@ -272,28 +260,20 @@
     <!-- Upload new evidence -->
     {% if can_edit and not readonly_rollup %}
 
-      <form method="POST"
-            action="{{ url_for('evidence_upload') }}"
-            enctype="multipart/form-data"
-            class="d-inline-flex align-items-center gap-1">
+      <div class="d-inline-flex align-items-center gap-1">
 
-        <input type="hidden"
-               name="esg_data_id"
-               value="{{ entry.id }}">
+    <input type="file"
+           id="evidence-file-{{ entry.id }}"
+           class="form-control form-control-sm"
+           style="max-width: 140px;">
 
-        <input type="file"
-               name="file"
-               class="form-control form-control-sm"
-               style="max-width: 140px;">
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            onclick="uploadEvidence('{{ entry.id }}')">
+        <i class="fa-solid fa-upload"></i>
+    </button>
 
-        <button type="submit"
-                class="btn btn-sm btn-outline-secondary">
-
-          <i class="fa-solid fa-upload"></i>
-
-        </button>
-
-      </form>
+</div>
 
     {% endif %}
 
@@ -408,6 +388,59 @@ function rejectEvidence(evidenceId) {
     document.body.appendChild(form);
 
     form.submit();
+}
+function verifyEvidence(evidenceId) {
+    const form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = "/evidence/" + evidenceId + "/verify";
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+
+function deleteEvidence(evidenceId) {
+    if (!confirm("Remove this evidence file?")) {
+        return;
+    }
+
+    const form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = "/evidence/" + evidenceId + "/delete";
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+
+function uploadEvidence(esgDataId) {
+    const fileInput = document.getElementById(
+        "evidence-file-" + esgDataId
+    );
+
+    if (!fileInput || !fileInput.files.length) {
+        alert("Please select a file first.");
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("esg_data_id", esgDataId);
+    formData.append("file", fileInput.files[0]);
+
+    fetch("/evidence/upload", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Evidence upload failed.");
+    });
 }
 </script>
 {% endblock %}
