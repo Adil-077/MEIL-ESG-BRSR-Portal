@@ -77,3 +77,145 @@ body {
 .consolidated-badge { font-size: 0.65rem; }
 
 .card { border-radius: 12px; }
+/* =========================================================
+   THEME MODE
+   ========================================================= */
+
+:root {
+    --bg-color: #f5f7fa;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --muted-color: #6c757d;
+    --input-bg: #ffffff;
+    --table-bg: #ffffff;
+}
+
+/* Dark mode variables */
+html.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e9ecef;
+    --card-bg: #1e1e1e;
+    --border-color: #343a40;
+    --muted-color: #adb5bd;
+    --input-bg: #252525;
+    --table-bg: #1e1e1e;
+}
+
+/* Main page */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* Tables */
+.table {
+    --bs-table-bg: var(--table-bg);
+    --bs-table-color: var(--text-color);
+    color: var(--text-color);
+}
+
+/* Forms */
+.form-control,
+.form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+/* Placeholder text */
+html.dark-mode .form-control::placeholder {
+    color: #adb5bd;
+}
+
+/* Modal */
+html.dark-mode .modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* Dropdown */
+html.dark-mode .dropdown-menu {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .dropdown-item {
+    color: var(--text-color);
+}
+
+html.dark-mode .dropdown-item:hover {
+    background-color: #343a40;
+}
+
+/* Muted text */
+html.dark-mode .text-muted {
+    color: var(--muted-color) !important;
+}
+
+/* Theme button */
+.theme-toggle {
+    width: 38px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+
+/* Dark mode - alert boxes */
+html.dark-mode .alert-light {
+    background-color: #2a2a2a !important;
+    color: #e9ecef !important;
+    border-color: #404040 !important;
+}
+
+html.dark-mode .alert-light .text-muted {
+    color: #adb5bd !important;
+}
+
+html.dark-mode .alert-light i {
+    color: #adb5bd !important;
+}
+/* Dark mode - ESG Intelligence recommendation box */
+html.dark-mode .bg-light {
+    background-color: #2a2a2a !important;
+    color: #e9ecef !important;
+}
+
+html.dark-mode .bg-light strong {
+    color: #e9ecef !important;
+}
+
+html.dark-mode .bg-light .fa-circle-info {
+    color: #adb5bd !important;
+}
+/* Dark mode - Dashboard KPI tiles */
+html.dark-mode .kpi-tile {
+    background-color: #2a2a2a !important;
+    color: #e9ecef !important;
+    border: 1px solid #3d3d3d;
+}
+
+html.dark-mode .kpi-tile .text-muted {
+    color: #adb5bd !important;
+}
+
+html.dark-mode .kpi-tile .fw-bold {
+    color: #f1f3f5 !important;
+}

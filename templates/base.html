@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    const savedTheme = localStorage.getItem("meil-theme");
+
+    if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark-mode");
+    }
+
+    document.documentElement.classList.add("theme-loading");
+</script>
+
+<style>
+    html.theme-loading body {
+        visibility: hidden;
+    }
+</style>
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}MEIL ESG / BRSR Portal{% endblock %}</title>
@@ -9,6 +25,7 @@
 <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
+
 
 {% if current_user.is_authenticated %}
 <nav class="navbar navbar-expand-lg navbar-dark meil-navbar sticky-top">
@@ -36,12 +53,30 @@
         <li class="nav-item"><a class="nav-link {% if request.endpoint=='audit_log' %}active{% endif %}" href="{{ url_for('audit_log') }}"><i class="fa-solid fa-file-shield me-1"></i>Audit Trail</a></li>
         {% endif %}
       </ul>
-      <span class="navbar-text me-3 text-light">
-        <span class="badge role-badge role-{{ current_user.role|lower }}">{{ current_user.role_label() }}</span>
-        {{ current_user.full_name }}
-      </span>
-      <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
-    </div>
+      <div class="d-flex align-items-center gap-2">
+
+  <!-- Theme Toggle -->
+  <button
+    type="button"
+    id="themeToggle"
+    class="btn btn-outline-light btn-sm theme-toggle"
+    title="Toggle theme"
+    aria-label="Toggle theme">
+    <i class="fa-solid fa-moon"></i>
+  </button>
+
+  <span class="navbar-text text-light">
+    <span class="badge role-badge role-{{ current_user.role|lower }}">
+      {{ current_user.role_label() }}
+    </span>
+    {{ current_user.full_name }}
+  </span>
+
+  <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+    <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
+  </a>
+
+</div>
   </div>
 </nav>
 {% endif %}
@@ -67,6 +102,52 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = themeToggle ? themeToggle.querySelector("i") : null;
+
+    if (!themeToggle || !themeIcon) {
+        return;
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem("meil-theme");
+
+    if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark-mode");
+        themeIcon.classList.remove("fa-moon");
+        themeIcon.classList.add("fa-sun");
+    }
+
+    // Toggle theme
+    themeToggle.addEventListener("click", function () {
+
+        document.documentElement.classList.toggle("dark-mode");
+
+        const isDark = document.documentElement.classList.contains("dark-mode");
+
+        if (isDark) {
+            themeIcon.classList.remove("fa-moon");
+            themeIcon.classList.add("fa-sun");
+
+            localStorage.setItem("meil-theme", "dark");
+        } else {
+            themeIcon.classList.remove("fa-sun");
+            themeIcon.classList.add("fa-moon");
+
+            localStorage.setItem("meil-theme", "light");
+        }
+    });
+
+});
+</script>
+
 {% block scripts %}{% endblock %}
+<script>
+    document.documentElement.classList.remove("theme-loading");
+</script>
 </body>
 </html>
