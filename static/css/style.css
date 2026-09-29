@@ -219,3 +219,306 @@ html.dark-mode .kpi-tile .text-muted {
 html.dark-mode .kpi-tile .fw-bold {
     color: #f1f3f5 !important;
 }
+/* Dark mode text contrast fixes */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: #e9ecef !important;
+}
+
+body.dark-mode .card h1,
+body.dark-mode .card h2,
+body.dark-mode .card h3,
+body.dark-mode .card h4,
+body.dark-mode .card h5,
+body.dark-mode .card h6 {
+    color: #e9ecef !important;
+}
+body.dark-mode .evidence-item {
+    background-color: #252525;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 10px;
+}
+body.dark-mode hr,
+body.dark-mode .table,
+body.dark-mode .border-bottom {
+    border-color: #343434 !important;
+}
+/* Dark mode - improve principle heading contrast */
+body.dark-mode .principle-title,
+body.dark-mode .section-title,
+body.dark-mode h5 {
+    color: #7db7ff !important;
+}
+/* Dark mode - BRSR principle headings */
+html.dark-mode .text-meil {
+    color: #7db7ff !important;
+}
+/* =========================================================
+   MODERN UI — TYPOGRAPHY
+   ========================================================= */
+
+body {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+}
+
+button,
+.btn,
+.form-control,
+.form-select {
+    font-family: 'Inter', sans-serif;
+}
+/* =========================================================
+   MODERN UI — PAGE TRANSITIONS
+   ========================================================= */
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body {
+    animation: pageEnter 0.25s ease-out;
+}
+/* =========================================================
+   MODERN UI — CARDS & SURFACES
+   ========================================================= */
+
+.card {
+    border-radius: 12px;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* Lift only interactive cards */
+.card.card-hover:hover,
+.kpi-tile:hover,
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+html.dark-mode .card.card-hover:hover,
+html.dark-mode .kpi-tile:hover,
+html.dark-mode .dashboard-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+/* Dark mode shadow */
+html.dark-mode .card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+/* =========================================================
+   MODERN UI — BUTTONS & FORM CONTROLS
+   ========================================================= */
+
+.btn {
+    border-radius: 8px;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Modern form controls */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+}
+
+/* Dark mode focus */
+html.dark-mode .form-control:focus,
+html.dark-mode .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(125, 183, 255, 0.15);
+}
+/* =========================================================
+   MODERN UI — NAVIGATION
+   ========================================================= */
+
+.meil-navbar .nav-link {
+    position: relative;
+    border-radius: 7px;
+    margin: 0 2px;
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.meil-navbar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    transform: translateY(-1px);
+}
+
+.meil-navbar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Dropdown */
+.dropdown-menu {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.dropdown-item {
+    border-radius: 6px;
+    margin: 2px 4px;
+    width: auto;
+    transition:
+        background-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.dropdown-item:hover {
+    transform: translateX(2px);
+}
+
+/* Dark mode dropdown shadow */
+html.dark-mode .dropdown-menu {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+/* =========================================================
+   MODERN UI — ALERTS
+   ========================================================= */
+
+.alert {
+    border-radius: 10px;
+    animation: alertEnter 0.25s ease-out;
+}
+
+@keyframes alertEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* =========================================================
+   MODERN UI — MODALS
+   ========================================================= */
+
+.modal.fade .modal-dialog {
+    transform: translateY(-12px) scale(0.98);
+    transition: transform 0.2s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.modal-content {
+    border-radius: 12px;
+}
+/* =========================================================
+   MODERN UI — TAB TRANSITIONS
+   ========================================================= */
+
+.tab-pane {
+    transition: opacity 0.2s ease;
+}
+
+.tab-pane.fade {
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.tab-pane.fade:not(.show) {
+    transform: translateY(4px);
+}
+
+.tab-pane.fade.show {
+    transform: translateY(0);
+}
+/* =========================================================
+   MODERN UI — KPI ANIMATIONS
+   ========================================================= */
+
+.kpi-tile {
+    animation: kpiEnter 0.35s ease-out both;
+}
+
+.kpi-tile:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.kpi-tile:nth-child(2) {
+    animation-delay: 0.10s;
+}
+
+.kpi-tile:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.kpi-tile:nth-child(4) {
+    animation-delay: 0.20s;
+}
+
+@keyframes kpiEnter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.kpi-tile {
+    cursor: default;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.kpi-tile:hover {
+    transform: translateY(-3px);
+}

@@ -212,31 +212,23 @@
        <!-- Reviewer actions -->
 {% if current_user.role in ["SUPER_ADMIN", "GROUP_ESG_ADMIN", "SUBSIDIARY_ADMIN", "REVIEWER"] %}
 
-  {% if ev.status != "VERIFIED" %}
+  {% if ev.status == "PENDING" %}
 
-    <div class="d-flex gap-1 mt-2">
+    <button type="button"
+            class="btn btn-sm btn-outline-success"
+            onclick="verifyEvidence('{{ ev.id }}')">
+        <i class="fa-solid fa-check me-1"></i>
+        Verify
+    </button>
 
-      <!-- Verify -->
-      <button type="button"
-        class="btn btn-sm btn-outline-success"
-        onclick="verifyEvidence('{{ ev.id }}')">
-    <i class="fa-solid fa-check me-1"></i>
-    Verify
-</button>
-
-      <!-- Reject -->
-      <button type="button"
-              class="btn btn-sm btn-outline-danger"
-              onclick="rejectEvidence('{{ ev.id }}')">
-
+    <button type="button"
+            class="btn btn-sm btn-outline-danger"
+            onclick="rejectEvidence('{{ ev.id }}')">
         <i class="fa-solid fa-xmark me-1"></i>
         Reject
+    </button>
 
-      </button>
-
-    </div>
-
-  {% endif %}
+{% endif %}
 
 {% endif %}
 
