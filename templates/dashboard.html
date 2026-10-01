@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — MEIL ESG Portal{% endblock %}
 {% block content %}
+<div id="dashboard-loading" class="dashboard-loading">
+    <div class="dashboard-loading-spinner"></div>
+    <span>Loading ESG dashboard…</span>
+</div>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
   <div>
@@ -8,13 +12,25 @@
     <p class="text-muted mb-0">Real-time BRSR disclosure status across the MEIL Group hierarchy</p>
   </div>
   <form class="d-flex gap-2 mt-2 mt-lg-0" method="GET">
-    <select name="org_id" class="form-select form-select-sm" onchange="this.form.submit()">
-      {% for o in orgs %}
-        <option value="{{ o.id }}" {% if selected_org and o.id == selected_org.id %}selected{% endif %}>
-          {{ '— ' if o.org_type=='SUBSIDIARY' else '—— ' if o.org_type=='BUSINESS_UNIT' else '' }}{{ o.name }}
-        </option>
-      {% endfor %}
-    </select>
+    <div class="org-selector-wrap">
+    <span class="org-selector-label">Organization</span>
+    <select
+    name="org_id"
+    id="orgSelector"
+    class="form-select form-select-sm">
+
+    {% for o in orgs %}
+    <option
+        value="{{ o.id }}"
+        {% if selected_org and o.id == selected_org.id %}selected{% endif %}>
+        {{ '— ' if o.org_type=='SUBSIDIARY'
+           else '—— ' if o.org_type=='BUSINESS_UNIT'
+           else '' }}{{ o.name }}
+        — {{ o.org_type.replace('_', ' ').title() }}
+    </option>
+{% endfor %}
+</select>
+    </div>
     <select name="period_id" class="form-select form-select-sm" onchange="this.form.submit()">
       {% for p in periods %}
         <option value="{{ p.id }}" {% if selected_period and p.id == selected_period.id %}selected{% endif %}>{{ p.name }}</option>
@@ -92,7 +108,9 @@
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
         <h6 class="fw-bold mb-3">E / S / G Pillar Contribution — {{ selected_period.name }}</h6>
-        <canvas id="pillarChart" height="220"></canvas>
+        <div class="dashboard-chart">
+    <canvas id="pillarChart"></canvas>
+</div>
       </div>
     </div>
   </div>
@@ -100,7 +118,9 @@
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
         <h6 class="fw-bold mb-3">GHG Emissions — Year-on-Year Trend (tCO2e)</h6>
-        <canvas id="trendChart" height="220"></canvas>
+       <div class="dashboard-chart">
+    <canvas id="trendChart"></canvas>
+</div>
       </div>
     </div>
   </div>
@@ -111,7 +131,9 @@
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
         <h6 class="fw-bold mb-3">YoY Comparison — E / S / G</h6>
-        <canvas id="yoyChart" height="220"></canvas>
+        <div class="dashboard-chart">
+    <canvas id="yoyChart"></canvas>
+</div>
       </div>
     </div>
   </div>
@@ -223,6 +245,9 @@
 {% endblock %}
 
 {% block scripts %}
+<link
+    href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
+    rel="stylesheet">
 {% if selected_org and selected_period %}
 <script>
 // Expose the selected IDs without declaring block-scoped variables that may
@@ -231,5 +256,31 @@ window.ORG_ID = Number("{{ selected_org.id }}");
 window.PERIOD_ID = Number("{{ selected_period.id }}");
 </script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const orgSelector = document.getElementById("orgSelector");
+
+    if (!orgSelector) {
+        return;
+    }
+
+    const orgSelect = new TomSelect(orgSelector, {
+        create: false,
+        allowEmptyOption: false,
+        searchField: ["text"],
+        placeholder: "Search organization...",
+        maxOptions: 100
+    });
+
+    orgSelect.on("change", function () {
+        orgSelector.form.submit();
+    });
+
+});
+</script>
+
 {% endif %}
 {% endblock %}

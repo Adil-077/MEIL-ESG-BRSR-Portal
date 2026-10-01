@@ -522,3 +522,237 @@ html.dark-mode .dropdown-menu {
 .kpi-tile:hover {
     transform: translateY(-3px);
 }
+/* =========================================================
+   DASHBOARD — CHART SIZE
+   ========================================================= */
+
+.dashboard-chart {
+    position: relative;
+    height: 270px;
+    width: 100%;
+}
+/* =========================================================
+   MODERN UI — DASHBOARD LOADING
+   ========================================================= */
+
+.dashboard-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    animation: loadingFade 0.2s ease-out;
+}
+
+.dashboard-loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-top-color: #1f6feb;
+    border-radius: 50%;
+    animation: dashboardSpin 0.7s linear infinite;
+}
+
+@keyframes dashboardSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes loadingFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+/* =========================================================
+   DARK MODE — DISABLED / READONLY FORM CONTROLS
+   ========================================================= */
+
+html.dark-mode .form-control:disabled,
+html.dark-mode .form-control[readonly],
+html.dark-mode .form-select:disabled {
+    background-color: #242424 !important;
+    color: #e9ecef !important;
+    border-color: #3d3d3d !important;
+    opacity: 1 !important;
+}
+
+html.dark-mode .form-control:disabled::placeholder,
+html.dark-mode .form-control[readonly]::placeholder {
+    color: #8f8f8f !important;
+}
+/* =========================================================
+   ORGANIZATION SELECTOR — MODERN UI
+   ========================================================= */
+
+.ts-wrapper {
+    min-width: 320px;
+    max-width: 420px;
+}
+
+.ts-control {
+    min-height: 40px !important;
+    border-radius: 9px !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: none !important;
+    padding: 6px 12px !important;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.ts-control:hover {
+    border-color: #9aa4b2 !important;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: #1f6feb !important;
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12) !important;
+}
+
+.ts-control input {
+    color: var(--text-color) !important;
+}
+
+.ts-control input::placeholder {
+    color: var(--muted-color) !important;
+}
+
+.ts-dropdown {
+    margin-top: 5px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+    overflow: hidden;
+}
+
+.ts-dropdown .option {
+    padding: 10px 13px !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.15s ease;
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active {
+    background-color: rgba(31, 111, 235, 0.10) !important;
+    color: var(--text-color) !important;
+}
+
+/* Dark mode */
+
+html.dark-mode .ts-control {
+    background: #242424 !important;
+    border-color: #3d3d3d !important;
+    color: #e9ecef !important;
+}
+
+html.dark-mode .ts-dropdown {
+    background: #242424 !important;
+    border-color: #3d3d3d !important;
+    color: #e9ecef !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark-mode .ts-dropdown .option {
+    color: #e9ecef !important;
+}
+
+html.dark-mode .ts-dropdown .option:hover,
+html.dark-mode .ts-dropdown .option.active {
+    background-color: #303f55 !important;
+    color: #ffffff !important;
+}
+/* Search icon inside organization selector */
+
+.ts-control::before {
+    content: "\f002";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: var(--muted-color);
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.ts-wrapper.focus .ts-control::before {
+    color: #1f6feb;
+}
+
+.ts-control > input {
+    flex: 1 !important;
+    min-width: 60px !important;
+}
+/* =========================================================
+   ORGANIZATION — FLOATING LABEL
+   ========================================================= */
+
+.org-selector-wrap {
+    position: relative;
+    min-width: 320px;
+    max-width: 420px;
+}
+
+.org-selector-label {
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    z-index: 10;
+
+    padding: 0 6px;
+
+    background: var(--page-bg);
+    color: var(--text-color);
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+html.dark-mode .org-selector-label {
+    background: var(--page-bg);
+    color: #e9ecef;
+}
+/* =========================================================
+   ORGANIZATION — FLOATING LABEL
+   ========================================================= */
+
+.org-selector-wrap {
+    position: relative;
+    min-width: 320px;
+    max-width: 420px;
+}
+
+.org-selector-label {
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    z-index: 10;
+
+    padding: 0 6px;
+
+    background: var(--page-bg);
+    color: var(--text-color);
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+html.dark-mode .org-selector-label {
+    background: var(--page-bg);
+    color: #e9ecef;
+}
