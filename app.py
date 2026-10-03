@@ -17,7 +17,7 @@ from extensions import db, login_manager
 from models import (
     User, Organization, ReportingPeriod, ESGData, Evidence, Review,
     ReportSubmission, AuditLog, ROLES, ROLE_LABELS, PERIOD_STATUSES,
-    SUBMISSION_STATUSES,
+    SUBMISSION_STATUSES, Notification
 )
 from utils.decorators import (
     roles_required, org_access_required, ADMIN_ROLES, HIERARCHY_MANAGERS,
@@ -78,6 +78,35 @@ def user_default_org():
     if current_user.organization:
         return current_user.organization
     return Organization.query.filter_by(org_type="GROUP").first()
+def get_visible_notifications():
+    """Return notifications visible to the current user."""
+    if not current_user.is_authenticated:
+        return []
+
+    # Super Admin can see every notification.
+    if current_user.role == "SUPER_ADMIN":
+        return (
+            Notification.query
+            .order_by(Notification.created_at.desc())
+            .limit(20)
+            .all()
+        )
+
+    # System-wide notifications are visible to everyone.
+    visible_org_ids = current_user.accessible_org_ids()
+
+    return (
+        Notification.query
+        .filter(
+            db.or_(
+                Notification.recipient_org_id.is_(None),
+                Notification.recipient_org_id.in_(visible_org_ids)
+            )
+        )
+        .order_by(Notification.created_at.desc())
+        .limit(20)
+        .all()
+    )
 
 
 def allowed_file(filename):
@@ -94,6 +123,88 @@ def index():
         return redirect(url_for("dashboard"))
     return redirect(url_for("login"))
 
+
+@app.route("/notifications/send", methods=["POST"])
+@login_required
+def send_notification():
+    # Only admins can send notifications
+    if current_user.role not in [
+        "SUPER_ADMIN",
+        "GROUP_ESG_ADMIN",
+        "SUBSIDIARY_ADMIN",
+        "BU_USER"
+    ]:
+        abort(403)
+
+    title = request.form.get("title", "").strip()
+    message = request.form.get("message", "").strip()
+    notification_type = request.form.get(
+        "notification_type",
+        "INFO"
+    ).strip().upper()
+
+    recipient_org_id = request.form.get(
+        "recipient_org_id",
+        type=int
+    )
+
+    if not title or not message:
+        flash("Title and message are required.", "danger")
+        return redirect(request.referrer or url_for("dashboard"))
+
+    if current_user.role != "SUPER_ADMIN":
+        if recipient_org_id is None:
+            flash(
+                "Organization-specific notification required.",
+                "danger"
+            )
+            return redirect(
+                request.referrer or url_for("dashboard")
+            )
+
+        if recipient_org_id not in current_user.accessible_org_ids():
+            abort(403)
+
+    notification = Notification(
+        sender_id=current_user.id,
+        recipient_org_id=recipient_org_id,
+        title=title,
+        message=message,
+        notification_type=notification_type
+    )
+
+    db.session.add(notification)
+    db.session.commit()
+
+    flash("Notification sent successfully.", "success")
+
+    return redirect(
+        request.referrer or url_for("dashboard")
+    )
+@app.route("/api/notifications")
+@login_required
+def api_notifications():
+    notifications = get_visible_notifications()
+
+    data = []
+
+    for notification in notifications:
+        data.append({
+            "id": notification.id,
+            "title": notification.title,
+            "message": notification.message,
+            "type": notification.notification_type,
+            "created_at": (
+                notification.created_at.strftime("%d %b %Y, %I:%M %p")
+                if notification.created_at
+                else ""
+            )
+        })
+
+    return jsonify({
+        "notifications": data,
+        "unread_count": 0
+    })
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

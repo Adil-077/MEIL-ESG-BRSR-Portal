@@ -70,6 +70,54 @@
     aria-label="Toggle theme">
     <i class="fa-solid fa-moon"></i>
   </button>
+  <a
+  href="#"
+  class="nav-link text-light notification-bell me-3"
+  id="notificationBell"
+  title="Notifications">
+
+  <i class="fa-solid fa-bell"></i>
+
+  <span
+    class="notification-badge"
+    id="notificationBadge"
+    style="display: none;">
+    0
+  </span>
+
+</a>
+</a>
+
+<div
+  class="notification-panel shadow-sm"
+  id="notificationPanel"
+  style="display: none;">
+
+  <div class="notification-panel-header">
+    <strong>Notifications</strong>
+
+    <button
+      type="button"
+      class="btn btn-sm btn-link"
+      id="markNotificationsRead">
+      Mark all read
+    </button>
+  </div>
+
+  <div
+    class="notification-list"
+    id="notificationList">
+
+    <div class="notification-empty">
+      <i class="fa-regular fa-bell-slash"></i>
+      <div>No notifications</div>
+    </div>
+
+  </div>
+
+</div>
+
+<span class="navbar-text text-light">
 
   <span class="navbar-text text-light">
     <span class="badge role-badge role-{{ current_user.role|lower }}">
@@ -154,6 +202,36 @@ document.addEventListener("DOMContentLoaded", function () {
 {% block scripts %}{% endblock %}
 <script>
     document.documentElement.classList.remove("theme-loading");
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const bell = document.getElementById("notificationBell");
+    const panel = document.getElementById("notificationPanel");
+
+    console.log("Notification JS loaded");
+    console.log("Bell:", bell);
+    console.log("Panel:", panel);
+
+    if (!bell || !panel) {
+        console.log("Notification elements not found");
+        return;
+    }
+
+    bell.onclick = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log("Bell clicked");
+
+        if (panel.style.display === "block") {
+            panel.style.display = "none";
+        } else {
+            panel.style.display = "block";
+        }
+    };
+
+});
 </script>
 </body>
 </html>

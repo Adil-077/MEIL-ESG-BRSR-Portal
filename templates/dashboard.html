@@ -26,7 +26,7 @@
         {{ '— ' if o.org_type=='SUBSIDIARY'
            else '—— ' if o.org_type=='BUSINESS_UNIT'
            else '' }}{{ o.name }}
-        — {{ o.org_type.replace('_', ' ').title() }}
+        
     </option>
 {% endfor %}
 </select>
@@ -211,6 +211,123 @@
             <li class="text-muted">Checking...</li>
           </ul>
         </div>
+        <!-- Dashboard Notifications -->
+<div class="dashboard-notifications mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+
+  <div>
+    <h6 class="fw-bold mb-0">
+      <i class="fa-solid fa-bell me-2 text-primary"></i>
+      Notifications
+    </h6>
+  </div>
+
+  <div class="d-flex align-items-center gap-3">
+
+
+    <div class="d-flex align-items-center gap-3">
+
+  {% if current_user.role in ["SUPER_ADMIN", "GROUP_ESG_ADMIN", "SUBSIDIARY_ADMIN"] %}
+  <button
+  type="button"
+  class="btn btn-sm btn-primary"
+  id="newNotificationBtn"
+  data-bs-toggle="modal"
+  data-bs-target="#newNotificationModal">
+  <i class="fa-solid fa-plus me-1"></i>
+  New notification
+</button>
+  {% endif %}
+
+  <button
+    type="button"
+    class="btn btn-sm btn-link text-decoration-none p-0"
+    id="dashboardMarkNotificationsRead">
+    Mark all read
+  </button>
+
+</div>
+
+  </div>
+
+</div>
+
+  <div
+    id="dashboardNotificationList"
+    class="dashboard-notification-list">
+
+    <div class="dashboard-notification-empty">
+      <i class="fa-regular fa-bell-slash"></i>
+      <span>No notifications</span>
+    </div>
+ </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const notificationList =
+        document.getElementById("dashboardNotificationList");
+
+    if (!notificationList) return;
+
+    fetch("/api/notifications")
+        .then(response => response.json())
+        .then(data => {
+
+            const notifications = data.notifications || [];
+
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="dashboard-notification-empty">
+                        <i class="fa-regular fa-bell-slash"></i>
+                        <span>No notifications</span>
+                    </div>
+                `;
+                return;
+            }
+
+            notificationList.innerHTML = notifications.map(notification => `
+                <div class="dashboard-notification-item">
+
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+
+                        <div>
+                            <div class="fw-semibold small">
+                                ${notification.title}
+                            </div>
+
+                            <div class="small text-muted mt-1">
+                                ${notification.message}
+                            </div>
+                        </div>
+
+                        <span class="badge bg-light text-dark">
+                            ${notification.type}
+                        </span>
+
+                    </div>
+
+                    <div class="small text-muted mt-2">
+                        ${notification.created_at}
+                    </div>
+
+                </div>
+            `).join("");
+
+        })
+        .catch(error => {
+            console.error("Notification loading failed:", error);
+
+            notificationList.innerHTML = `
+                <div class="text-muted small">
+                    Unable to load notifications.
+                </div>
+            `;
+        });
+
+});
+</script>
+</div>
       </div>
     </div>
   </div>
@@ -223,6 +340,15 @@
             <i class="fa-solid fa-triangle-exclamation me-2 text-warning"></i>
             ESG Intelligence — YoY Anomalies
           </h6>
+          {% if current_user.role in ["SUPER_ADMIN", "GROUP_ESG_ADMIN", "SUBSIDIARY_ADMIN"] %}
+<button
+    type="button"
+    class="btn btn-sm btn-primary"
+    id="newNotificationBtn">
+    <i class="fa-solid fa-plus me-1"></i>
+    New notification
+</button>
+{% endif %}
           <span class="badge bg-light text-dark" id="anomaly-count">
             0 detected
           </span>
@@ -243,8 +369,259 @@
 {% endif %}
 
 {% endblock %}
-
 {% block scripts %}
+<!-- New Notification Modal -->
+<div
+  class="modal fade notification-composer"
+  id="newNotificationModal"
+  tabindex="-1"
+  aria-labelledby="newNotificationModalLabel"
+  aria-hidden="true">
+
+  <div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="modal-header">
+
+        <div class="notification-title-wrap">
+
+          <div class="notification-title-icon">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+
+          <div>
+            <h5
+              class="modal-title"
+              id="newNotificationModalLabel">
+              Create notification
+            </h5>
+
+            <div class="notification-subtitle">
+              Send an update to the right people
+            </div>
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close">
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Notification Type -->
+        <div class="composer-field">
+
+          <div class="composer-label">
+            <i class="fa-solid fa-layer-group"></i>
+            Notification type
+          </div>
+
+          <div class="notification-type-grid">
+
+            <div class="notification-type-option">
+
+              <input
+                type="radio"
+                name="notification_type"
+                id="notificationTypeAnnouncement"
+                value="ANNOUNCEMENT"
+                checked>
+
+              <label for="notificationTypeAnnouncement">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span>Announcement</span>
+              </label>
+
+            </div>
+
+
+            <div class="notification-type-option">
+
+              <input
+                type="radio"
+                name="notification_type"
+                id="notificationTypeAction"
+                value="ACTION">
+
+              <label for="notificationTypeAction">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Action required</span>
+              </label>
+
+            </div>
+
+
+            <div class="notification-type-option">
+
+              <input
+                type="radio"
+                name="notification_type"
+                id="notificationTypeInfo"
+                value="INFO">
+
+              <label for="notificationTypeInfo">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Information</span>
+              </label>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Title -->
+        <div class="composer-field">
+
+          <label
+            for="notificationTitle"
+            class="composer-label">
+
+            <i class="fa-solid fa-heading"></i>
+            Title
+
+          </label>
+
+          <input
+            type="text"
+            class="form-control"
+            id="notificationTitle"
+            placeholder="Give your notification a clear title"
+            maxlength="200">
+
+        </div>
+
+
+        <!-- Message -->
+        <div class="composer-field">
+
+          <label
+            for="notificationMessage"
+            class="composer-label">
+
+            <i class="fa-solid fa-align-left"></i>
+            Message
+
+          </label>
+
+          <textarea
+            class="form-control"
+            id="notificationMessage"
+            placeholder="Write your notification..."
+            rows="5"></textarea>
+
+        </div>
+
+
+   <!-- Audience -->
+<div class="composer-field mb-0">
+
+  <div class="composer-label">
+    <i class="fa-solid fa-users"></i>
+    Audience
+  </div>
+
+  {% if current_user.role == "SUPER_ADMIN" %}
+
+  <select
+    class="form-select"
+    id="notificationRecipient"
+    name="recipient_org_id">
+
+    <option value="">
+      🌐 Everyone
+    </option>
+
+    {% for org in orgs %}
+      <option value="{{ org.id }}">
+        🏢 {{ org.name }}
+      </option>
+    {% endfor %}
+
+  </select>
+
+  <div class="notification-recipient-description mt-2">
+    <i class="fa-solid fa-circle-info me-1"></i>
+    Choose everyone or a specific organization.
+  </div>
+
+  {% else %}
+
+  <div class="notification-recipient">
+
+    <div class="notification-recipient-icon">
+      <i class="fa-solid fa-building"></i>
+    </div>
+
+    <div class="notification-recipient-content">
+
+      <div class="notification-recipient-title">
+        {{ current_user.organization.name if current_user.organization else "Your organization" }}
+      </div>
+
+      <div class="notification-recipient-description">
+        Only users in your organization and Super Admin can see this.
+      </div>
+
+    </div>
+
+    <i class="fa-solid fa-lock text-muted"></i>
+
+  </div>
+
+  <input
+    type="hidden"
+    id="notificationRecipient"
+    name="recipient_org_id"
+    value="{{ current_user.org_id }}">
+
+  {% endif %}
+
+</div>
+
+</div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-cancel"
+          data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-send"
+          id="sendNotificationBtn">
+
+          <i class="fa-solid fa-paper-plane me-2"></i>
+          Send notification
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
 <link
     href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
     rel="stylesheet">
@@ -271,8 +648,25 @@ document.addEventListener("DOMContentLoaded", function () {
         create: false,
         allowEmptyOption: false,
         searchField: ["text"],
-        placeholder: "Search organization...",
-        maxOptions: 100
+        placeholder: "Search organizations...",
+        maxOptions: 100,
+        render: {
+        option: function (data, escape) {
+            return `
+                <div class="org-option">
+                    ${escape(data.text)}
+                </div>
+            `;
+        },
+
+        item: function (data, escape) {
+            return `
+                <div class="org-selected">
+                    ${escape(data.text)}
+                </div>
+            `;
+        }
+    }
     });
 
     orgSelect.on("change", function () {
@@ -283,4 +677,98 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 {% endif %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const sendButton = document.getElementById("sendNotificationBtn");
+
+    if (!sendButton) return;
+
+    sendButton.addEventListener("click", async function () {
+
+        const title = document.getElementById("notificationTitle").value.trim();
+        const message = document.getElementById("notificationMessage").value.trim();
+
+        const selectedType = document.querySelector(
+            'input[name="notification_type"]:checked'
+        );
+
+        const recipient = document.getElementById("notificationRecipient");
+
+        if (!title) {
+            alert("Please enter a notification title.");
+            document.getElementById("notificationTitle").focus();
+            return;
+        }
+
+        if (!message) {
+            alert("Please enter a notification message.");
+            document.getElementById("notificationMessage").focus();
+            return;
+        }
+
+        if (!selectedType) {
+            alert("Please select a notification type.");
+            return;
+        }
+
+        if (!recipient) {
+            alert("Please select an audience.");
+            return;
+        }
+
+        const originalButtonHTML = sendButton.innerHTML;
+
+        sendButton.disabled = true;
+
+        sendButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Sending...
+        `;
+
+        const formData = new FormData();
+
+        formData.append("title", title);
+        formData.append("message", message);
+        formData.append("notification_type", selectedType.value);
+
+        if (recipient.value) {
+            formData.append("recipient_org_id", recipient.value);
+        }
+
+        try {
+
+            const response = await fetch(
+                "/notifications/send",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Notification request failed.");
+            }
+
+            window.location.reload();
+
+        } catch (error) {
+
+            console.error(
+                "Notification sending failed:",
+                error
+            );
+
+            alert(
+                "Unable to send the notification. Please try again."
+            );
+
+            sendButton.disabled = false;
+            sendButton.innerHTML = originalButtonHTML;
+        }
+
+    });
+
+});
+</script>
 {% endblock %}

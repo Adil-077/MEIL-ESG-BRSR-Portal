@@ -269,3 +269,49 @@ class AuditLog(db.Model):
 
     def __repr__(self):
         return f"<AuditLog {self.action} {self.entity}#{self.entity_id}>"
+
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    sender_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # NULL = system-wide notification
+    recipient_org_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organizations.id"),
+        nullable=True
+    )
+
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+
+    notification_type = db.Column(
+        db.String(30),
+        nullable=False,
+        default="INFO"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow
+    )
+
+    sender = db.relationship(
+        "User",
+        foreign_keys=[sender_id]
+    )
+
+    recipient_org = db.relationship(
+        "Organization",
+        foreign_keys=[recipient_org_id]
+    )
+
+    def __repr__(self):
+        return f"<Notification {self.title}>"
