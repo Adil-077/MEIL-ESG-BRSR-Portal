@@ -315,3 +315,212 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f"<Notification {self.title}>"
+    
+class EmissionFactor(db.Model):
+    __tablename__ = "emission_factors"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Identification
+    name = db.Column(db.String(200), nullable=False)
+    scope = db.Column(db.String(20), nullable=False)
+    activity_type = db.Column(db.String(100), nullable=False)
+
+    # Factor
+    factor_value = db.Column(db.Float, nullable=False)
+    factor_unit = db.Column(db.String(100), nullable=False)
+
+    # Output/result unit
+    result_unit = db.Column(
+        db.String(50),
+        nullable=False,
+        default="tCO2e"
+    )
+
+    # Traceability
+    source = db.Column(db.String(300), nullable=False)
+    methodology = db.Column(db.Text, nullable=True)
+
+    source_year = db.Column(db.Integer, nullable=True)
+    version = db.Column(db.String(50), nullable=True)
+
+    # Registry control
+    active = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=True
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        onupdate=utcnow
+    )
+
+    def __repr__(self):
+        return f"<EmissionFactor {self.name}>"
+class GHGActivity(db.Model):
+      __tablename__ = "ghg_activities"
+
+      id = db.Column(db.Integer, primary_key=True)
+
+      org_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organizations.id"),
+        nullable=False
+    )
+
+      period_id = db.Column(
+        db.Integer,
+        db.ForeignKey("reporting_periods.id"),
+        nullable=False
+    )
+
+      scope = db.Column(db.String(20), nullable=False)
+
+      activity_type = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+      activity_value = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+      activity_unit = db.Column(
+        db.String(50),
+        nullable=False
+    )
+
+      emission_factor_id = db.Column(
+        db.Integer,
+        db.ForeignKey("emission_factors.id"),
+        nullable=True
+    )
+
+      calculated_tco2e = db.Column(
+        db.Float,
+        nullable=True
+    )
+
+      created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
+      created_at = db.Column(
+        db.DateTime,
+        default=utcnow
+    )
+
+      emission_factor = db.relationship(
+        "EmissionFactor",
+        foreign_keys=[emission_factor_id]
+    )
+
+      organization = db.relationship(
+        "Organization",
+        foreign_keys=[org_id]
+    )
+
+      reporting_period = db.relationship(
+        "ReportingPeriod",
+        foreign_keys=[period_id]
+    )
+
+      creator = db.relationship(
+        "User",
+        foreign_keys=[created_by]
+    )
+      evidence = db.relationship(
+        "GHGEvidence",
+        backref="ghg_activity",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+      evidence = db.relationship(
+        "GHGEvidence",
+        backref="ghg_activity",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+def __repr__(self):
+        return f"<GHGActivity {self.scope} {self.activity_type}>"
+class GHGEvidence(db.Model):
+    __tablename__ = "ghg_evidence"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    ghg_activity_id = db.Column(
+        db.Integer,
+        db.ForeignKey("ghg_activities.id"),
+        nullable=False
+    )
+
+    file_name = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    stored_path = db.Column(
+        db.String(500),
+        nullable=False
+    )
+
+    uploaded_by = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
+    uploaded_at = db.Column(
+        db.DateTime,
+        default=utcnow
+    )
+
+    status = db.Column(
+        db.String(20),
+        nullable=False,
+        default="PENDING"
+    )
+
+    verified_by = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
+    verified_at = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+
+    verification_comment = db.Column(
+        db.Text,
+        nullable=True
+    )
+
+    activity = db.relationship(
+        "GHGActivity",
+        foreign_keys=[ghg_activity_id]
+    )
+
+    uploader = db.relationship(
+        "User",
+        foreign_keys=[uploaded_by]
+    )
+
+    verifier = db.relationship(
+        "User",
+        foreign_keys=[verified_by]
+    )
+
+    def __repr__(self):
+        return f"<GHGEvidence {self.file_name}>"

@@ -71,7 +71,9 @@ SECTION_C = [
 
     {"code": "C_P6_ENERGY", "principle": "P6", "name": "Total energy consumption", "data_type": "number", "unit": "GJ", "min": 0, "rollup": True, "required": True},
     {"code": "C_P6_WATER", "principle": "P6", "name": "Total water withdrawal", "data_type": "number", "unit": "KL", "min": 0, "rollup": True, "required": True},
-    {"code": "C_P6_GHG", "principle": "P6", "name": "Total GHG emissions (Scope 1 + Scope 2)", "data_type": "number", "unit": "tCO2e", "min": 0, "rollup": True, "required": True},
+    {"code": "C_P6_SCOPE1", "principle": "P6", "name": "Scope 1 - Direct GHG emissions", "data_type": "number", "unit": "tCO2e", "min": 0, "rollup": True, "required": True},
+{"code": "C_P6_SCOPE2", "principle": "P6", "name": "Scope 2 - Indirect GHG emissions from purchased energy", "data_type": "number", "unit": "tCO2e", "min": 0, "rollup": True, "required": True},
+{"code": "C_P6_SCOPE3", "principle": "P6", "name": "Scope 3 - Other indirect GHG emissions across the value chain", "data_type": "number", "unit": "tCO2e", "min": 0, "rollup": True, "required": True},
     {"code": "C_P6_WASTE", "principle": "P6", "name": "Total waste generated", "data_type": "number", "unit": "tonnes", "min": 0, "rollup": True, "required": True},
 
     {"code": "C_P7_ADVOCACY", "principle": "P7", "name": "Public policy advocacy engagements undertaken", "data_type": "integer", "unit": "count", "min": 0, "rollup": True, "required": True},

@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}GHG Activity Entry{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">GHG Activity Entry</h2>
+            <p class="text-muted mb-0">
+                Record activity data for Scope 1, Scope 2 and Scope 3 emissions.
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body p-4">
+
+            <form method="POST">
+
+                <!-- Organization -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        Organization
+                    </label>
+
+                    <select
+                        name="org_id"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Select organization
+                        </option>
+
+                        {% for org in orgs %}
+
+                            <option
+                                value="{{ org.id }}"
+                                {% if selected_org and selected_org.id == org.id %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ org.name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <!-- Reporting Period -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Reporting Period
+                    </label>
+
+                    <select
+                        name="period_id"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Select reporting period
+                        </option>
+
+                        {% for period in periods %}
+
+                            <option
+                                value="{{ period.id }}"
+                                {% if selected_period and selected_period.id == period.id %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ period.name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Scope -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Emission Scope
+                    </label>
+
+                    <select
+                        name="scope"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Select scope
+                        </option>
+
+                        <option value="SCOPE2">
+                            Scope 2 — Indirect Energy Emissions
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Activity -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Activity Type
+                    </label>
+
+                    <select
+                        name="activity_type"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Select activity
+                        </option>
+
+                        <option value="PURCHASED_ELECTRICITY">
+                            Purchased Electricity
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Activity Value -->
+                <div class="row">
+
+                    <div class="col-md-8 mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Activity Quantity
+                        </label>
+
+                        <input
+                            type="number"
+                            name="activity_value"
+                            class="form-control"
+                            min="0"
+                            step="0.01"
+                            placeholder="e.g. 250"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Unit
+                        </label>
+
+                        <select
+                            name="activity_unit"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select unit
+                            </option>
+
+                            <option value="MWh">
+                                MWh
+                            </option>
+
+                            <option value="kWh">
+                                kWh
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Information -->
+                <div class="alert alert-info">
+
+                    <strong>Calculation:</strong>
+
+                    Emissions will be calculated using the approved
+                    emission factor from the ESG Emission Factor Registry.
+
+                </div>
+
+
+                <!-- Submit -->
+                <div class="d-flex justify-content-end">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary px-4"
+                    >
+                        Save GHG Activity
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- Saved GHG Activities -->
+<div class="card shadow-sm border-0 mt-4">
+
+    <div class="card-body p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="fw-bold mb-1">Saved GHG Activities</h4>
+                <p class="text-muted mb-0">
+                    Calculated emissions for the selected organization and reporting period.
+                </p>
+            </div>
+        </div>
+
+        {% if activities %}
+
+        <div class="table-responsive">
+
+            <table class="table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Scope</th>
+                        <th>Activity</th>
+                        <th>Quantity</th>
+                        <th>Emission Factor</th>
+                        <th>Calculated Emissions</th>
+                        <th>Evidence</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for activity in activities %}
+
+                    <tr>
+
+                        <td>
+                            <span class="badge bg-primary">
+                                {{ activity.scope }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ activity.activity_type.replace("_", " ").title() }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ activity.activity_value }}
+                            {{ activity.activity_unit }}
+                        </td>
+
+                        <td>
+
+                            {% if activity.emission_factor %}
+
+                                <div>
+                                    <strong>
+                                        {{ activity.emission_factor.factor_value }}
+                                    </strong>
+                                    {{ activity.emission_factor.factor_unit }}
+                                </div>
+
+                                <small class="text-muted">
+                                    {{ activity.emission_factor.source }}
+                                    {% if activity.emission_factor.version %}
+                                        · Version {{ activity.emission_factor.version }}
+                                    {% endif %}
+                                </small>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    No factor
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if activity.calculated_tco2e is not none %}
+
+                                <strong>
+                                    {{ "%.2f"|format(activity.calculated_tco2e) }}
+                                </strong>
+
+                                <small class="text-muted">
+                                    tCO₂e
+                                </small>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Not calculated
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                       <td>
+    {% if activity.evidence %}
+        {% for evidence in activity.evidence %}
+            <div class="mb-2">
+                <div>
+                    <strong>{{ evidence.file_name }}</strong>
+                </div>
+
+                <span class="badge
+                    {% if evidence.status == 'VERIFIED' %}
+                        bg-success
+                    {% elif evidence.status == 'REJECTED' %}
+                        bg-danger
+                    {% else %}
+                        bg-warning text-dark
+                    {% endif %}
+                ">
+                    {{ evidence.status }}
+                </span>
+                                {% if evidence.status == 'PENDING' %}
+                    <form
+                        method="POST"
+                        action="{{ url_for('ghg_evidence_verify', evidence_id=evidence.id) }}"
+                        class="mt-2"
+                    >
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-success"
+                        >
+                            <i class="fa-solid fa-check me-1"></i>
+                            Verify
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <span class="text-muted">No evidence</span>
+    {% endif %}
+
+    <form
+        method="POST"
+        action="{{ url_for('ghg_evidence_upload') }}"
+        enctype="multipart/form-data"
+        class="mt-2"
+    >
+        <input
+            type="hidden"
+            name="ghg_activity_id"
+            value="{{ activity.id }}"
+        >
+
+        <input
+            type="file"
+            name="file"
+            class="form-control form-control-sm mb-2"
+            required
+        >
+
+        <button
+            type="submit"
+            class="btn btn-sm btn-primary"
+        >
+            Upload Evidence
+        </button>
+    </form>
+</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <div class="text-center py-4 text-muted">
+                No GHG activities recorded for this organization and period.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

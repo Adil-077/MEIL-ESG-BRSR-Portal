@@ -44,6 +44,12 @@
     </button>
     <div class="collapse navbar-collapse" id="navMain">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+  <a class="nav-link {% if request.endpoint=='ghg_activity' %}active{% endif %}"
+     href="{{ url_for('ghg_activity') }}">
+    <i class="fa-solid fa-cloud me-1"></i>GHG
+  </a>
+</li>
         <li class="nav-item"><a class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-gauge me-1"></i>Dashboard</a></li>
         {% if current_user.role in ['SUPER_ADMIN','GROUP_ESG_ADMIN','SUBSIDIARY_ADMIN','REVIEWER'] %}
         <li class="nav-item"><a class="nav-link {% if request.endpoint=='hierarchy' %}active{% endif %}" href="{{ url_for('hierarchy') }}"><i class="fa-solid fa-sitemap me-1"></i>Hierarchy</a></li>

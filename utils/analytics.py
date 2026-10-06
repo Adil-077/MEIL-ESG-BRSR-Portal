@@ -120,9 +120,15 @@ def get_anomaly_recommendation(metric, direction, severity):
         "C_P6_WATER":
             "Review water withdrawal records, meter readings, estimation methods, and reporting boundaries.",
 
-        "C_P6_GHG":
-            "Review emission sources, activity data, emission factors, and reporting boundaries before submission.",
+        "C_P6_SCOPE1":
+            "Review direct emission sources, activity data, fuel records, emission factors, and reporting boundaries before submission.",
 
+        "C_P6_SCOPE2":
+            "Review purchased energy records, electricity or utility bills, emission factors, and reporting boundaries before submission.",
+
+        "C_P6_SCOPE3":
+           "Review value-chain activity data, applicable Scope 3 categories, emission factors, source documentation, and reporting boundaries before submission.",
+           
         "C_P6_WASTE":
             "Review waste records, waste categories, disposal/recovery data, and reporting boundaries.",
 

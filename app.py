@@ -1,7 +1,8 @@
 import os
 import uuid
 from werkzeug.utils import secure_filename
-from datetime import datetime, date
+from datetime import datetime, timezone
+from utils.ghg_calculator import calculate_from_factor
 
 from flask import (
     Flask, render_template, redirect, url_for, request, flash, session,
@@ -17,7 +18,7 @@ from extensions import db, login_manager
 from models import (
     User, Organization, ReportingPeriod, ESGData, Evidence, Review,
     ReportSubmission, AuditLog, ROLES, ROLE_LABELS, PERIOD_STATUSES,
-    SUBMISSION_STATUSES, Notification
+    SUBMISSION_STATUSES, Notification, GHGActivity, EmissionFactor, GHGEvidence,
 )
 from utils.decorators import (
     roles_required, org_access_required, ADMIN_ROLES, HIERARCHY_MANAGERS,
@@ -330,7 +331,9 @@ def api_dashboard_data():
     # ---------------------------------------------------------
 
     headline_codes = [
-        "C_P6_GHG",
+        "C_P6_SCOPE1",
+        "C_P6_SCOPE2",
+        "C_P6_SCOPE3",
         "C_P6_ENERGY",
         "C_P6_WATER",
         "C_P8_CSR_SPEND"
@@ -367,18 +370,31 @@ def api_dashboard_data():
 
     for p in all_periods:
 
-        row = ESGData.query.filter_by(
+        scope1 = ESGData.query.filter_by(
             org_id=org_id,
             period_id=p.id,
-            metric_code="C_P6_GHG"
+            metric_code="C_P6_SCOPE1"
         ).first()
 
-        trend_ghg.append(
-            row.numeric_value()
-            if row and row.numeric_value() is not None
-            else 0
-        )
+        scope2 = ESGData.query.filter_by(
+            org_id=org_id,
+            period_id=p.id,
+            metric_code="C_P6_SCOPE2"
+        ).first()
 
+        scope3 = ESGData.query.filter_by(
+            org_id=org_id,
+            period_id=p.id,
+            metric_code="C_P6_SCOPE3"
+        ).first()
+
+        total_ghg = sum(
+    row.numeric_value() or 0
+    for row in [scope1, scope2, scope3]
+    if row is not None
+)
+
+        trend_ghg.append(total_ghg)
     # ---------------------------------------------------------
     # ESG INTELLIGENCE
     # ---------------------------------------------------------
@@ -826,6 +842,89 @@ def evidence_upload():
             period_id=ev_data.period_id
         )
     )
+@app.route("/ghg/evidence/upload", methods=["POST"])
+@login_required
+def ghg_evidence_upload():
+    ghg_activity_id = request.form.get("ghg_activity_id", type=int)
+
+    file = request.files.get("file")
+
+    if not ghg_activity_id or not file or not file.filename:
+        flash("Please select a file to upload.", "danger")
+        return redirect(request.referrer or url_for("dashboard"))
+
+    activity = GHGActivity.query.get_or_404(ghg_activity_id)
+
+    if activity.org_id not in current_user.accessible_org_ids():
+        abort(403)
+
+    period = ReportingPeriod.query.get_or_404(activity.period_id)
+
+    if (
+        current_user.role not in DATA_ENTRY_ROLES
+        or period.status not in ("OPEN", "REVIEW")
+    ):
+        abort(403)
+
+    if not allowed_file(file.filename):
+        flash("File type is not allowed.", "danger")
+        return redirect(request.referrer or url_for("ghg_activity"))
+
+    filename = secure_filename(file.filename)
+
+    if not filename:
+        flash("Invalid file name.", "danger")
+        return redirect(
+            url_for(
+                "ghg_activity",
+                org_id=activity.org_id,
+                period_id=activity.period_id
+            )
+        )
+
+    upload_dir = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        "ghg_evidence"
+    )
+
+    os.makedirs(upload_dir, exist_ok=True)
+
+    stored_name = f"{uuid.uuid4().hex}_{filename}"
+    stored_path = os.path.join(upload_dir, stored_name)
+
+    file.save(stored_path)
+
+    evidence = GHGEvidence(
+        ghg_activity_id=activity.id,
+        file_name=filename,
+        stored_path=stored_path,
+        uploaded_by=current_user.id,
+        status="PENDING"
+    )
+
+    db.session.add(evidence)
+    db.session.commit()
+
+    log_action(
+        current_user.id,
+        "UPLOAD",
+        "GHGEvidence",
+        evidence.id,
+        None,
+        filename
+    )
+
+    db.session.commit()
+
+    flash("GHG evidence uploaded successfully.", "success")
+
+    return redirect(
+        url_for(
+            "ghg_activity",
+            org_id=activity.org_id,
+            period_id=activity.period_id
+        )
+    )
 @app.route("/evidence/<int:evidence_id>/delete", methods=["POST"])
 @login_required
 def evidence_delete(evidence_id):
@@ -888,6 +987,59 @@ def evidence_download(evidence_id):
         as_attachment=True,
         download_name=ev.file_name
     )
+@app.route("/ghg/evidence/<int:evidence_id>/verify", methods=["POST"])
+@login_required
+def ghg_evidence_verify(evidence_id):
+
+    allowed_roles = [
+        "SUPER_ADMIN",
+        "GROUP_ESG_ADMIN",
+        "SUBSIDIARY_ADMIN",
+        "REVIEWER"
+    ]
+
+    if current_user.role not in allowed_roles:
+        abort(403)
+
+    ev = GHGEvidence.query.get_or_404(evidence_id)
+
+    activity = GHGActivity.query.get_or_404(ev.ghg_activity_id)
+
+    if activity.org_id not in current_user.accessible_org_ids():
+        abort(403)
+
+    old_status = ev.status
+
+    ev.status = "VERIFIED"
+    ev.verified_by = current_user.id
+    ev.verified_at = datetime.now(timezone.utc)
+    ev.verification_comment = (
+        request.form.get("comment", "").strip() or None
+    )
+
+    db.session.commit()
+
+    log_action(
+        current_user.id,
+        "VERIFY",
+        "GHGEvidence",
+        ev.id,
+        old_status,
+        "VERIFIED"
+    )
+
+    db.session.commit()
+
+    flash("GHG evidence verified successfully.", "success")
+
+    return redirect(
+        url_for(
+            "ghg_activity",
+            org_id=activity.org_id,
+            period_id=activity.period_id
+        )
+    )
+
 @app.route("/evidence/<int:evidence_id>/verify", methods=["POST"])
 @login_required
 def evidence_verify(evidence_id):
@@ -1184,8 +1336,167 @@ def forbidden(e):
 def not_found(e):
     return render_template("error.html", code=404, message="The page you requested could not be found."), 404
 
+@app.route("/ghg", methods=["GET", "POST"])
+@login_required
+def ghg_activity():
+    orgs = Organization.query.filter(
+        Organization.id.in_(current_user.accessible_org_ids())
+    ).order_by(Organization.name).all()
+
+    periods = ReportingPeriod.query.order_by(
+        ReportingPeriod.id.desc()
+    ).all()
+
+    selected_org_id = request.args.get("org_id", type=int)
+    selected_period_id = request.args.get("period_id", type=int)
+
+    selected_org = None
+    selected_period = None
+
+    if selected_org_id:
+        selected_org = Organization.query.get(selected_org_id)
+
+    if selected_period_id:
+        selected_period = ReportingPeriod.query.get(selected_period_id)
+
+        activities = []
+
+    if selected_org and selected_period:
+        activities = GHGActivity.query.filter_by(
+            org_id=selected_org.id,
+            period_id=selected_period.id
+        ).order_by(
+            GHGActivity.id.desc()
+        ).all()
+
+    if request.method == "POST":
+        org_id = request.form.get("org_id", type=int)
+        period_id = request.form.get("period_id", type=int)
+
+        scope = request.form.get("scope")
+        activity_type = request.form.get("activity_type")
+        activity_value = request.form.get("activity_value", type=float)
+        activity_unit = request.form.get("activity_unit")
+
+        if org_id not in current_user.accessible_org_ids():
+            abort(403)
+
+        if scope != "SCOPE2":
+            flash("Only Scope 2 is currently supported.", "warning")
+            return redirect(
+                url_for(
+                    "ghg_activity",
+                    org_id=org_id,
+                    period_id=period_id
+                )
+            )
+
+        if not activity_type:
+            flash("Please select an activity type.", "danger")
+            return redirect(
+                url_for(
+                    "ghg_activity",
+                    org_id=org_id,
+                    period_id=period_id
+                )
+            )
+
+            if activity_value is None or activity_value < 0:
+              flash("Activity value must be zero or greater.", "danger")
+            return redirect(
+                url_for(
+                    "ghg_activity",
+                    org_id=org_id,
+                    period_id=period_id
+                )
+            )
+
+        if not activity_unit:
+            flash("Please select an activity unit.", "danger")
+            return redirect(
+                url_for(
+                    "ghg_activity",
+                    org_id=org_id,
+                    period_id=period_id
+                )
+            )
+
+        factor = EmissionFactor.query.filter_by(
+            scope=scope,
+            activity_type=activity_type,
+            active=True
+        ).first()
+
+        if not factor:
+            flash(
+                "No active emission factor is available for this activity.",
+                "danger"
+            )
+            return redirect(
+                url_for(
+                    "ghg_activity",
+                    org_id=org_id,
+                    period_id=period_id
+                )
+            )
+
+        # Convert kWh to MWh when necessary
+        calculation_value = activity_value
+
+        if activity_unit == "kWh" and factor.factor_unit == "tCO2/MWh":
+            calculation_value = activity_value / 1000
+
+        calculated_tco2e = calculate_from_factor(
+            calculation_value,
+            factor
+        )
+
+        activity = GHGActivity(
+            org_id=org_id,
+            period_id=period_id,
+            scope=scope,
+            activity_type=activity_type,
+            activity_value=activity_value,
+            activity_unit=activity_unit,
+            emission_factor_id=factor.id,
+            calculated_tco2e=calculated_tco2e,
+            created_by=current_user.id
+        )
+
+        db.session.add(activity)
+        db.session.commit()
+
+        flash("GHG activity saved successfully.", "success")
+
+        return redirect(
+            url_for(
+                "ghg_activity",
+                org_id=org_id,
+                period_id=period_id
+            )
+        )
+    activities = []
+
+    if selected_org and selected_period:
+        activities = GHGActivity.query.filter_by(
+            org_id=selected_org.id,
+            period_id=selected_period.id
+        ).order_by(GHGActivity.id.desc()).all()
+
+    return render_template(
+        "ghg_activity.html",
+        orgs=orgs,
+        periods=periods,
+        selected_org=selected_org,
+        selected_period=selected_period,
+        activities=activities
+    )
+
 
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
+
     app.run(debug=True, host="0.0.0.0", port=5000)
+
+

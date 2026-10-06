@@ -268,7 +268,10 @@
 
     const map = {
 
-      "kpi-ghg": data.headline.C_P6_GHG,
+      "kpi-ghg":
+    (data.headline.C_P6_SCOPE1 || 0) +
+    (data.headline.C_P6_SCOPE2 || 0) +
+    (data.headline.C_P6_SCOPE3 || 0),
 
       "kpi-energy": data.headline.C_P6_ENERGY,
 
