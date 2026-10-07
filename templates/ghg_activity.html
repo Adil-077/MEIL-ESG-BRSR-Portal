@@ -336,17 +336,22 @@
                     <strong>{{ evidence.file_name }}</strong>
                 </div>
 
-                <span class="badge
-                    {% if evidence.status == 'VERIFIED' %}
-                        bg-success
-                    {% elif evidence.status == 'REJECTED' %}
-                        bg-danger
-                    {% else %}
-                        bg-warning text-dark
-                    {% endif %}
-                ">
-                    {{ evidence.status }}
-                </span>
+               <span
+    class="badge
+        {% if evidence.status == 'VERIFIED' %}
+            bg-success
+        {% elif evidence.status == 'REJECTED' %}
+            bg-danger
+        {% else %}
+            bg-warning text-dark
+        {% endif %}
+    "
+    {% if evidence.status == 'REJECTED' and evidence.verification_comment %}
+        title="Rejection reason: {{ evidence.verification_comment }}"
+    {% endif %}
+>
+    {{ evidence.status }}
+</span>
                                 {% if evidence.status == 'PENDING' %}
                     <form
                         method="POST"
@@ -362,6 +367,29 @@
                         </button>
                     </form>
                 {% endif %}
+                {% if evidence.status == 'PENDING' %}
+    <form
+        method="POST"
+        action="{{ url_for('ghg_evidence_reject', evidence_id=evidence.id) }}"
+        class="mt-2"
+    >
+        <input
+            type="text"
+            name="comment"
+            class="form-control form-control-sm mb-2"
+            placeholder="Reason for rejection"
+            required
+        >
+
+        <button
+            type="submit"
+            class="btn btn-sm btn-danger"
+        >
+            <i class="fa-solid fa-xmark me-1"></i>
+            Reject
+        </button>
+    </form>
+{% endif %}
             </div>
         {% endfor %}
     {% else %}

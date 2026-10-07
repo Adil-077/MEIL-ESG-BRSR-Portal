@@ -1039,6 +1039,68 @@ def ghg_evidence_verify(evidence_id):
             period_id=activity.period_id
         )
     )
+@app.route("/ghg/evidence/<int:evidence_id>/reject", methods=["POST"])
+@login_required
+def ghg_evidence_reject(evidence_id):
+
+    allowed_roles = [
+        "SUPER_ADMIN",
+        "GROUP_ESG_ADMIN",
+        "SUBSIDIARY_ADMIN",
+        "REVIEWER"
+    ]
+
+    if current_user.role not in allowed_roles:
+        abort(403)
+
+    ev = GHGEvidence.query.get_or_404(evidence_id)
+
+    activity = GHGActivity.query.get_or_404(ev.ghg_activity_id)
+
+    if activity.org_id not in current_user.accessible_org_ids():
+        abort(403)
+
+    reason = request.form.get("comment", "").strip()
+
+    if not reason:
+        flash("Please provide a rejection reason.", "danger")
+        return redirect(
+            url_for(
+                "ghg_activity",
+                org_id=activity.org_id,
+                period_id=activity.period_id
+            )
+        )
+
+    old_status = ev.status
+
+    ev.status = "REJECTED"
+    ev.verified_by = current_user.id
+    ev.verified_at = datetime.now(timezone.utc)
+    ev.verification_comment = reason
+
+    db.session.commit()
+
+    log_action(
+        current_user.id,
+        "REJECT",
+        "GHGEvidence",
+        ev.id,
+        old_status,
+        "REJECTED"
+    )
+
+    db.session.commit()
+
+    flash("GHG evidence rejected.", "warning")
+
+    return redirect(
+        url_for(
+            "ghg_activity",
+            org_id=activity.org_id,
+            period_id=activity.period_id
+        )
+    )
 
 @app.route("/evidence/<int:evidence_id>/verify", methods=["POST"])
 @login_required

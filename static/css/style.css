@@ -1466,3 +1466,1474 @@ html:not(.dark-mode) .notification-composer .notification-subtitle,
 html:not(.dark-mode) .notification-composer .notification-recipient-description {
     color: #667085;
 }
+/* =========================================================
+   FUTURISTIC ESG COMMAND CENTER HEADER
+   ========================================================= */
+
+.dashboard-command-header {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+    padding: 1.4rem 1.6rem;
+    border: 1px solid rgba(79, 156, 255, 0.22);
+    border-radius: 18px;
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(42, 126, 255, 0.16),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 15% 100%,
+            rgba(0, 210, 170, 0.10),
+            transparent 30%
+        ),
+        rgba(255, 255, 255, 0.035);
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.dashboard-command-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            90deg,
+            transparent 49%,
+            rgba(255, 255, 255, 0.025) 50%,
+            transparent 51%
+        );
+    background-size: 42px 42px;
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+.command-header-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(
+            rgba(100, 170, 255, 0.045) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(100, 170, 255, 0.045) 1px,
+            transparent 1px
+        );
+    background-size: 28px 28px;
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 30%,
+        black 80%,
+        transparent
+    );
+    pointer-events: none;
+}
+
+.command-header-content {
+    position: relative;
+    z-index: 2;
+}
+
+.command-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #72b7ff;
+}
+
+.command-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #35e69a;
+    box-shadow:
+        0 0 0 4px rgba(53, 230, 154, 0.10),
+        0 0 12px rgba(53, 230, 154, 0.75);
+    animation: commandPulse 2s infinite;
+}
+
+.command-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    font-size: clamp(1.55rem, 2.4vw, 2.05rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: #f4f8ff;
+}
+
+.command-title i {
+    color: #63aaff;
+    filter: drop-shadow(0 0 8px rgba(99, 170, 255, 0.45));
+}
+
+.command-subtitle {
+    margin: 0.35rem 0 0;
+    color: rgba(220, 232, 248, 0.68);
+    font-size: 0.88rem;
+}
+
+@keyframes commandPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(0.82);
+    }
+}
+
+/* Light mode */
+html:not(.dark-mode) .dashboard-command-header {
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(42, 126, 255, 0.09),
+            transparent 32%
+        ),
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #f5f9ff
+        );
+    border-color: rgba(30, 105, 190, 0.14);
+    box-shadow:
+        0 10px 30px rgba(30, 80, 140, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+html:not(.dark-mode) .command-title {
+    color: #17263d;
+}
+
+html:not(.dark-mode) .command-subtitle {
+    color: #617089;
+}
+
+html:not(.dark-mode) .command-status {
+    color: #176bc2;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+    .dashboard-command-header {
+        padding: 1.15rem 1.15rem;
+        border-radius: 14px;
+    }
+
+    .command-title {
+        font-size: 1.45rem;
+    }
+
+    .command-subtitle {
+        font-size: 0.8rem;
+    }
+}
+/* =========================================================
+   MEIL FUTURISTIC KPI COMMAND CARDS
+   ========================================================= */
+
+.meil-command-kpis {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr 1fr;
+    gap: 14px;
+}
+
+.meil-kpi-card {
+    position: relative;
+    min-height: 148px;
+    padding: 1.15rem 1.2rem;
+    overflow: hidden;
+
+    border: 1px solid rgba(100, 170, 255, 0.16);
+    border-radius: 16px;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(52, 130, 255, 0.12),
+            transparent 38%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.055),
+            rgba(255, 255, 255, 0.018)
+        );
+
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.meil-kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(76, 160, 255, 0.75),
+        transparent
+    );
+
+    opacity: 0.65;
+}
+
+.meil-kpi-card::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    right: -45px;
+    bottom: -55px;
+
+    border-radius: 50%;
+
+    background: rgba(42, 126, 255, 0.08);
+    filter: blur(20px);
+
+    pointer-events: none;
+}
+
+.meil-kpi-card:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(92, 165, 255, 0.35);
+
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.22),
+        0 0 25px rgba(45, 125, 255, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+
+/* ---------- Topline ---------- */
+
+.kpi-topline {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+    z-index: 2;
+}
+
+.kpi-icon {
+    width: 31px;
+    height: 31px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    color: #70b5ff;
+
+    background: rgba(60, 140, 255, 0.10);
+    border: 1px solid rgba(80, 155, 255, 0.16);
+
+    font-size: 0.82rem;
+}
+
+.status-icon {
+    color: #63dca5;
+    background: rgba(63, 210, 145, 0.09);
+    border-color: rgba(63, 210, 145, 0.15);
+}
+
+.period-icon {
+    color: #9f8cff;
+    background: rgba(130, 100, 255, 0.09);
+    border-color: rgba(130, 100, 255, 0.15);
+}
+
+.review-icon {
+    color: #ffbd68;
+    background: rgba(255, 177, 70, 0.09);
+    border-color: rgba(255, 177, 70, 0.15);
+}
+
+.kpi-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.105em;
+    color: rgba(190, 208, 232, 0.65);
+}
+
+
+/* ---------- Live indicator ---------- */
+
+.kpi-live-dot {
+    width: 6px;
+    height: 6px;
+    margin-left: auto;
+
+    border-radius: 50%;
+
+    background: #35e69a;
+
+    box-shadow:
+        0 0 0 3px rgba(53, 230, 154, 0.08),
+        0 0 10px rgba(53, 230, 154, 0.65);
+
+    animation: kpiLivePulse 2s infinite;
+}
+
+@keyframes kpiLivePulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
+
+/* ---------- Main values ---------- */
+
+.kpi-value {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 1rem;
+
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+
+    color: #f2f7ff;
+}
+
+.entity-name {
+    font-size: 1.15rem;
+    line-height: 1.25;
+    max-width: 95%;
+}
+
+.kpi-number {
+    font-size: 2rem;
+}
+
+
+/* ---------- Metadata ---------- */
+
+.kpi-meta {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+
+    margin-top: 0.45rem;
+}
+
+.kpi-meta-text {
+    font-size: 0.72rem;
+    color: rgba(180, 198, 223, 0.55);
+}
+
+.kpi-pill,
+.kpi-period {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0.22rem 0.5rem;
+
+    border-radius: 6px;
+
+    font-size: 0.67rem;
+    font-weight: 700;
+
+    color: #a9d0ff;
+
+    background: rgba(69, 145, 255, 0.09);
+    border: 1px solid rgba(69, 145, 255, 0.14);
+}
+
+
+/* ---------- Status ---------- */
+
+.meil-kpi-card .status-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0.38rem 0.65rem;
+
+    border-radius: 7px;
+
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+/* ---------- Review states ---------- */
+
+.kpi-success {
+    color: #55dda0;
+    font-size: 0.72rem;
+    font-weight: 650;
+}
+
+.kpi-warning {
+    color: #ffc46f;
+    font-size: 0.72rem;
+    font-weight: 650;
+}
+
+
+/* ---------- Light mode ---------- */
+
+html:not(.dark-mode) .meil-kpi-card {
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(52, 130, 255, 0.075),
+            transparent 38%
+        ),
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f7faff
+        );
+
+    border-color: rgba(30, 100, 180, 0.12);
+
+    box-shadow:
+        0 8px 25px rgba(30, 80, 140, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html:not(.dark-mode) .kpi-label {
+    color: #6b7c92;
+}
+
+html:not(.dark-mode) .kpi-value {
+    color: #17263d;
+}
+
+html:not(.dark-mode) .kpi-meta-text {
+    color: #718096;
+}
+
+html:not(.dark-mode) .kpi-icon {
+    background: rgba(50, 130, 240, 0.07);
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+    .meil-command-kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .meil-command-kpis {
+        grid-template-columns: 1fr;
+    }
+
+    .meil-kpi-card {
+        min-height: 135px;
+    }
+}
+/* =========================================================
+   MEIL COMMAND TOOLBAR
+   ========================================================= */
+
+.dashboard-command-toolbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+
+    border: 1px solid rgba(100, 170, 255, 0.13);
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.dashboard-command-toolbar .btn {
+    min-height: 38px;
+    border-radius: 9px;
+    font-size: 0.78rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.dashboard-command-toolbar .btn:hover {
+    transform: translateY(-2px);
+}
+
+.dashboard-command-toolbar .btn-meil-primary {
+    box-shadow: 0 5px 18px rgba(35, 115, 220, 0.20);
+}
+
+.dashboard-command-toolbar .btn-meil-primary:hover {
+    box-shadow:
+        0 8px 24px rgba(35, 115, 220, 0.28),
+        0 0 18px rgba(70, 150, 255, 0.10);
+}
+
+html:not(.dark-mode) .dashboard-command-toolbar {
+    background: #ffffff;
+    border-color: rgba(30, 100, 180, 0.10);
+    box-shadow: 0 5px 20px rgba(30, 80, 140, 0.05);
+}
+/* =========================================================
+   ESG INTELLIGENCE PANELS
+   ========================================================= */
+
+.intelligence-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.panel-eyebrow {
+    display: block;
+    margin-bottom: 0.2rem;
+
+    font-size: 0.62rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+
+    color: #5da8ff;
+}
+
+.panel-title {
+    margin: 0;
+
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.015em;
+
+    color: #f0f5fc;
+}
+
+.panel-period {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0.28rem 0.55rem;
+
+    border: 1px solid rgba(90, 160, 255, 0.15);
+    border-radius: 7px;
+
+    background: rgba(70, 140, 255, 0.07);
+
+    color: #9fc9f7;
+
+    font-size: 0.65rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+html:not(.dark-mode) .panel-title {
+    color: #17263d;
+}
+
+html:not(.dark-mode) .panel-eyebrow {
+    color: #2476c9;
+}
+
+html:not(.dark-mode) .panel-period {
+    color: #3678b8;
+    background: rgba(50, 130, 230, 0.06);
+    border-color: rgba(50, 130, 230, 0.12);
+}
+/* =========================================================
+   MEIL INTELLIGENCE CARDS
+   ========================================================= */
+
+.meil-intelligence-card {
+    position: relative;
+    overflow: hidden;
+
+    border: 1px solid rgba(100, 170, 255, 0.14);
+    border-radius: 16px;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(45, 125, 255, 0.09),
+            transparent 32%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.045),
+            rgba(255, 255, 255, 0.015)
+        );
+
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.meil-intelligence-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(80, 160, 255, 0.55),
+        transparent
+    );
+
+    opacity: 0.7;
+}
+
+.meil-intelligence-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(100, 170, 255, 0.25);
+
+    box-shadow:
+        0 16px 38px rgba(0, 0, 0, 0.18),
+        0 0 24px rgba(50, 130, 255, 0.05);
+}
+
+.meil-intelligence-card .card-body {
+    position: relative;
+    z-index: 1;
+    padding: 1.2rem;
+}
+
+html:not(.dark-mode) .meil-intelligence-card {
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(45, 125, 255, 0.055),
+            transparent 32%
+        ),
+        #ffffff;
+
+    border-color: rgba(30, 100, 180, 0.10);
+
+    box-shadow:
+        0 8px 25px rgba(30, 80, 140, 0.06);
+}
+
+html:not(.dark-mode) .meil-intelligence-card:hover {
+    border-color: rgba(30, 110, 200, 0.20);
+}
+/* =========================================================
+   DATA COMPLETENESS COMMAND PANEL
+   ========================================================= */
+
+.panel-live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 8px;
+    border: 1px solid rgba(50, 210, 140, 0.18);
+    border-radius: 7px;
+
+    background: rgba(50, 210, 140, 0.06);
+
+    color: #55d9a0;
+    font-size: 0.6rem;
+    font-weight: 750;
+    letter-spacing: 0.1em;
+}
+
+.panel-live-indicator::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+    background: #42d994;
+
+    box-shadow: 0 0 8px rgba(66, 217, 148, 0.7);
+
+    animation: completenessPulse 2s infinite;
+}
+
+.completeness-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 3px;
+
+    margin: 0.6rem 0 0.25rem;
+}
+
+.completeness-value {
+    font-size: 3.2rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.06em;
+
+    background: linear-gradient(
+        135deg,
+        #ffffff,
+        #78baff
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.completeness-symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6da9e8;
+}
+
+#completeness-bar {
+    border-radius: 999px;
+
+    background: linear-gradient(
+        90deg,
+        #287ee8,
+        #57b4ff
+    );
+
+    box-shadow: 0 0 12px rgba(70, 160, 255, 0.25);
+
+    transition: width 0.8s ease;
+}
+
+@keyframes completenessPulse {
+    0%, 100% {
+        opacity: 0.55;
+        transform: scale(0.9);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+html:not(.dark-mode) .completeness-value {
+    background: linear-gradient(
+        135deg,
+        #17263d,
+        #2476c9
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+html:not(.dark-mode) .completeness-symbol {
+    color: #2476c9;
+}
+/* =========================================================
+   DATA QUALITY ALERT
+   ========================================================= */
+
+.missing-metrics-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    margin-bottom: 0.5rem;
+
+    color: #a9b8ca;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.missing-metrics-header > span:first-child i {
+    color: #f0b35a;
+}
+
+.quality-alert-label {
+    padding: 3px 7px;
+
+    border: 1px solid rgba(240, 179, 90, 0.2);
+    border-radius: 6px;
+
+    background: rgba(240, 179, 90, 0.06);
+
+    color: #e9b86b;
+
+    font-size: 0.57rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+}
+
+#missing-metrics {
+    padding-left: 0;
+    list-style: none;
+}
+
+#missing-metrics li {
+    position: relative;
+
+    margin-bottom: 5px;
+    padding: 7px 9px 7px 25px;
+
+    border: 1px solid rgba(255, 255, 255, 0.055);
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    color: #aebdce;
+    font-size: 0.7rem;
+}
+
+#missing-metrics li::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+
+    width: 5px;
+    height: 5px;
+
+    transform: translateY(-50%);
+    border-radius: 50%;
+
+    background: #f0b35a;
+    box-shadow: 0 0 7px rgba(240, 179, 90, 0.4);
+}
+
+html:not(.dark-mode) .missing-metrics-header {
+    color: #52657c;
+}
+
+html:not(.dark-mode) #missing-metrics li {
+    background: #f8fafc;
+    border-color: rgba(30, 80, 140, 0.08);
+    color: #52657c;
+}
+/* =========================================================
+   ESG ANOMALY INTELLIGENCE CARDS
+   ========================================================= */
+
+.esg-anomaly-card {
+    position: relative;
+
+    padding: 12px 10px;
+
+    border: none;
+    border-radius: 0;
+
+    background: transparent;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.012)
+        );
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.esg-anomaly-card:hover {
+    transform: translateX(2px);
+    background: rgba(60, 140, 255, 0.025);
+}
+
+.anomaly-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.anomaly-metric-name {
+    color: #eef5fc;
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.anomaly-values {
+    margin-top: 4px;
+
+    color: #8498ae;
+    font-size: 0.68rem;
+}
+
+.anomaly-arrow {
+    margin: 0 4px;
+    color: #4e9cf2;
+}
+
+.anomaly-severity {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 7px;
+
+    border-radius: 6px;
+
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.severity-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+/* Critical */
+
+.anomaly-severity.critical {
+    border: 1px solid rgba(255, 80, 80, 0.20);
+    background: rgba(255, 70, 70, 0.08);
+    color: #ff8585;
+}
+
+.anomaly-severity.critical .severity-dot {
+    background: #ff6262;
+    box-shadow: 0 0 7px rgba(255, 80, 80, 0.65);
+}
+
+/* High */
+
+.anomaly-severity.high {
+    border: 1px solid rgba(255, 180, 70, 0.20);
+    background: rgba(255, 180, 70, 0.08);
+    color: #efbb70;
+}
+
+.anomaly-severity.high .severity-dot {
+    background: #f0ad4e;
+    box-shadow: 0 0 7px rgba(240, 173, 78, 0.60);
+}
+
+/* Moderate */
+
+.anomaly-severity.moderate {
+    border: 1px solid rgba(80, 180, 255, 0.20);
+    background: rgba(80, 180, 255, 0.07);
+    color: #72b9f5;
+}
+
+.anomaly-severity.moderate .severity-dot {
+    background: #55aaf0;
+    box-shadow: 0 0 7px rgba(85, 170, 240, 0.60);
+}
+
+.anomaly-change-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+
+    margin-top: 9px;
+}
+
+.anomaly-change {
+    font-size: 0.72rem;
+}
+
+.anomaly-period {
+    color: #687d93;
+    font-size: 0.64rem;
+}
+
+.anomaly-reason {
+    margin-top: 8px;
+
+    color: #91a4b8;
+    font-size: 0.68rem;
+    line-height: 1.45;
+}
+
+.anomaly-reason i {
+    color: #6baef0;
+}
+
+.anomaly-recommendation {
+    margin-top: 9px;
+    padding: 8px 9px;
+
+    border: 1px solid rgba(100, 170, 255, 0.08);
+    border-radius: 8px;
+
+    background: rgba(40, 120, 220, 0.035);
+}
+
+.recommendation-title {
+    color: #8fc4f7;
+    font-size: 0.63rem;
+    font-weight: 750;
+}
+
+.recommendation-text {
+    margin-top: 3px;
+
+    color: #879bad;
+    font-size: 0.65rem;
+    line-height: 1.4;
+}
+
+.anomaly-actions {
+    margin-top: 9px;
+}
+
+.anomaly-investigate {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 9px;
+
+    border: 1px solid rgba(70, 150, 255, 0.16);
+    border-radius: 7px;
+
+    background: rgba(60, 140, 255, 0.055);
+
+    color: #75b7f5;
+
+    font-size: 0.63rem;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.anomaly-investigate:hover {
+    transform: translateY(-1px);
+
+    background: rgba(60, 140, 255, 0.10);
+    border-color: rgba(70, 150, 255, 0.28);
+
+    color: #9bcefa;
+}
+
+html:not(.dark-mode) .esg-anomaly-card {
+    background: transparent;
+    border: none;
+}
+
+html:not(.dark-mode) .anomaly-metric-name {
+    color: #1c2d43;
+}
+
+html:not(.dark-mode) .anomaly-values,
+html:not(.dark-mode) .anomaly-reason {
+    color: #65778b;
+}
+
+html:not(.dark-mode) .anomaly-recommendation {
+    background: #f6f9fc;
+    border-color: rgba(30, 100, 180, 0.08);
+}
+
+html:not(.dark-mode) .recommendation-text {
+    color: #65778b;
+}
+
+html:not(.dark-mode) .anomaly-investigate {
+    color: #2677c5;
+}
+/* =========================================================
+   MEIL NOTIFICATION INTELLIGENCE PANEL
+   ========================================================= */
+
+.meil-notification-panel {
+    position: relative;
+    padding: 1rem 1.1rem;
+
+    border: 1px solid rgba(100, 170, 255, 0.12);
+    border-radius: 14px;
+
+    background:
+        radial-gradient(
+            circle at 0% 0%,
+            rgba(45, 125, 255, 0.06),
+            transparent 30%
+        ),
+        rgba(255, 255, 255, 0.018);
+
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.dashboard-notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.dashboard-notification-item {
+    position: relative;
+
+    padding: 10px 12px;
+
+    border-left: 2px solid rgba(70, 155, 255, 0.45);
+
+    border-radius: 0 8px 8px 0;
+
+    background: rgba(70, 140, 255, 0.035);
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.dashboard-notification-item:hover {
+    transform: translateX(2px);
+    background: rgba(70, 140, 255, 0.065);
+}
+
+.dashboard-notification-item .fw-semibold {
+    color: #e8f1fb;
+}
+
+.dashboard-notification-item .text-muted {
+    color: #8195aa !important;
+}
+
+.dashboard-notification-item .badge {
+    border: 1px solid rgba(100, 170, 255, 0.13);
+
+    background: rgba(70, 140, 255, 0.06) !important;
+
+    color: #82baf0 !important;
+
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+}
+
+.dashboard-notification-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 70px;
+
+    color: #71869b;
+
+    font-size: 0.72rem;
+}
+
+.dashboard-notification-empty i {
+    color: #4d8fca;
+    font-size: 1rem;
+}
+
+html:not(.dark-mode) .meil-notification-panel {
+    background: #ffffff;
+    border-color: rgba(30, 100, 180, 0.10);
+
+    box-shadow: 0 8px 25px rgba(30, 80, 140, 0.06);
+}
+
+html:not(.dark-mode) .dashboard-notification-item {
+    background: #f7faff;
+    border-left-color: rgba(35, 115, 210, 0.35);
+}
+
+html:not(.dark-mode) .dashboard-notification-item .fw-semibold {
+    color: #1d3047;
+}
+
+html:not(.dark-mode) .dashboard-notification-item .text-muted {
+    color: #64778b !important;
+}
+/* =========================================================
+   COMPACT NOTIFICATION FEED
+   ========================================================= */
+
+.meil-notification-panel {
+    padding: 0.75rem 0.9rem;
+}
+
+.meil-notification-panel .intelligence-panel-header {
+    margin-bottom: 0.55rem;
+}
+
+.meil-notification-panel .panel-title {
+    font-size: 0.9rem;
+}
+
+.meil-notification-panel .panel-eyebrow {
+    font-size: 0.55rem;
+}
+
+.dashboard-notification-list {
+    gap: 5px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 3px;
+}
+
+.dashboard-notification-item {
+    padding: 7px 9px;
+}
+
+.dashboard-notification-item .fw-semibold {
+    font-size: 0.72rem;
+}
+
+.dashboard-notification-item .text-muted {
+    font-size: 0.64rem;
+}
+
+.dashboard-notification-item .badge {
+    padding: 3px 6px;
+    font-size: 0.52rem;
+}
+
+.dashboard-notification-empty {
+    min-height: 45px;
+}
+
+/* Compact scrollbar */
+.dashboard-notification-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.dashboard-notification-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dashboard-notification-list::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(100, 170, 255, 0.22);
+}
+.meil-notification-panel #newNotificationBtn {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.68rem;
+    border-radius: 8px;
+}
+
+.meil-notification-panel #dashboardMarkNotificationsRead {
+    font-size: 0.68rem;
+}
+/* =========================================================
+   MEIL HEADLINE KPI INTELLIGENCE
+   ========================================================= */
+
+.meil-kpi-intelligence {
+    position: relative;
+
+    padding: 1rem 1.1rem;
+
+    border: 1px solid rgba(100, 170, 255, 0.10);
+    border-radius: 14px;
+
+    background:
+        radial-gradient(
+            circle at 0% 0%,
+            rgba(45, 125, 255, 0.055),
+            transparent 35%
+        ),
+        rgba(255, 255, 255, 0.018);
+
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.kpi-intelligence-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 0.8rem;
+}
+
+.kpi-system-status {
+    padding: 4px 7px;
+
+    border: 1px solid rgba(60, 190, 130, 0.18);
+    border-radius: 6px;
+
+    background: rgba(60, 190, 130, 0.055);
+
+    color: #6dd3a5;
+
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+
+.meil-headline-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 8px;
+}
+
+.headline-kpi {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    min-width: 0;
+
+    padding: 9px 10px;
+
+    border: 1px solid rgba(100, 170, 255, 0.07);
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.headline-kpi:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(90, 160, 255, 0.18);
+
+    background: rgba(60, 140, 255, 0.045);
+}
+
+.headline-kpi-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+
+    flex: 0 0 30px;
+
+    border-radius: 8px;
+
+    background: rgba(70, 150, 255, 0.08);
+
+    color: #6db2f3;
+
+    font-size: 0.72rem;
+}
+
+.headline-kpi-info {
+    min-width: 0;
+}
+
+.headline-kpi-label {
+    display: block;
+
+    color: #879bad;
+
+    font-size: 0.61rem;
+    font-weight: 650;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.headline-kpi-info strong {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #edf5fd;
+
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.headline-kpi-unit {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #60758a;
+
+    font-size: 0.55rem;
+}
+
+html:not(.dark-mode) .meil-kpi-intelligence {
+    background: #ffffff;
+    border-color: rgba(30, 100, 180, 0.09);
+
+    box-shadow: 0 8px 24px rgba(30, 80, 140, 0.05);
+}
+
+html:not(.dark-mode) .headline-kpi {
+    background: #f7faff;
+    border-color: rgba(30, 100, 180, 0.07);
+}
+
+html:not(.dark-mode) .headline-kpi-label {
+    color: #63778b;
+}
+
+html:not(.dark-mode) .headline-kpi-info strong {
+    color: #1d3047;
+}
+
+html:not(.dark-mode) .headline-kpi-unit {
+    color: #718499;
+}
+
+@media (max-width: 900px) {
+    .meil-headline-kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .meil-headline-kpis {
+        grid-template-columns: 1fr;
+    }
+}

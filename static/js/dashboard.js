@@ -460,60 +460,65 @@
 
       const div = document.createElement("div");
 
-      div.className =
-        "border rounded p-3 mb-2";
+     div.className =
+          "esg-anomaly-card mb-2";
 
 
-    div.innerHTML = `
-  <div class="d-flex justify-content-between align-items-start">
+   div.innerHTML = `
+  <div class="anomaly-card-top">
     <div>
-      <div class="fw-bold">
+      <div class="anomaly-metric-name">
         ${item.name}
       </div>
 
-      <div class="small text-muted mt-1">
+      <div class="anomaly-values">
         ${fmt(item.previous_value)}
         ${item.unit || ""}
-        →
+        <span class="anomaly-arrow">→</span>
         ${fmt(item.current_value)}
         ${item.unit || ""}
       </div>
     </div>
 
-    <span class="badge ${badgeClass}">
+    <span class="anomaly-severity ${severity.toLowerCase()}">
+      <span class="severity-dot"></span>
       ${severity}
     </span>
   </div>
 
-  <div class="mt-2">
-    <span class="${directionClass} fw-bold">
+  <div class="anomaly-change-row">
+    <span class="${directionClass} anomaly-change">
       <i class="fa-solid ${directionIcon} me-1"></i>
       ${changeValue}
     </span>
 
-    <span class="small text-muted ms-2">
+    <span class="anomaly-period">
       ${item.previous_period}
       →
       ${item.current_period}
     </span>
   </div>
 
-  <div class="small text-muted mt-1">
+  <div class="anomaly-reason">
+    <i class="fa-solid fa-circle-exclamation me-1"></i>
     ${item.reason || "Significant year-on-year change detected."}
   </div>
 
-  <div class="mt-2 p-2 rounded bg-light small">
-    <strong>
-      <i class="fa-solid fa-circle-info me-1"></i>
-      Recommended action:
-    </strong>
-    ${item.recommendation || "Review the underlying ESG records and supporting evidence."}
+  <div class="anomaly-recommendation">
+    <div class="recommendation-title">
+      <i class="fa-solid fa-lightbulb me-1"></i>
+      Recommended action
+    </div>
+
+    <div class="recommendation-text">
+      ${item.recommendation || "Review the underlying ESG records and supporting evidence."}
+    </div>
   </div>
 
-  <div class="mt-2">
+  <div class="anomaly-actions">
     <a
       href="/esg/${orgId}/${periodId}#metric-${item.code}"
-      class="btn btn-sm btn-outline-primary"
+      class="anomaly-investigate"
     >
       <i class="fa-solid fa-magnifying-glass me-1"></i>
       Investigate

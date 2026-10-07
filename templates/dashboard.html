@@ -8,8 +8,21 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
   <div>
-    <h3 class="fw-bold mb-0"><i class="fa-solid fa-gauge-high me-2 text-meil"></i>ESG Performance Dashboard</h3>
-    <p class="text-muted mb-0">Real-time BRSR disclosure status across the MEIL Group hierarchy</p>
+    <div class="dashboard-title-block">
+    <div class="command-status">
+        <span class="command-status-dot"></span>
+        LIVE ESG INTELLIGENCE
+    </div>
+
+    <h3 class="command-title">
+        <i class="fa-solid fa-gauge-high"></i>
+        ESG Command Center
+    </h3>
+
+    <p class="command-subtitle">
+        Real-time BRSR disclosure intelligence across the MEIL hierarchy
+    </p>
+</div>
   </div>
   <form class="d-flex gap-2 mt-2 mt-lg-0" method="GET">
     <div class="org-selector-wrap">
@@ -40,49 +53,120 @@
 </div>
 
 {% if selected_org and selected_period %}
-<div class="row g-3 mb-3">
-  <div class="col-md-3">
-    <div class="card kpi-card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">Selected Entity</div>
-        <div class="fw-bold">{{ selected_org.name }}</div>
-        <span class="badge bg-secondary-subtle text-dark">{{ selected_org.org_type.replace('_',' ').title() }}</span>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="card kpi-card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">Report Status ({{ selected_period.name }})</div>
-        <div class="fw-bold">
-          <span class="badge status-badge status-{{ (submission.status if submission else 'draft')|lower }}">
-            {{ submission.status if submission else 'DRAFT' }}
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="card kpi-card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">Period Status</div>
-        <div class="fw-bold">{{ selected_period.status }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="card kpi-card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">Pending Reviews (Group-wide)</div>
-        <div class="fw-bold fs-5">{{ pending_reviews }}</div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="meil-command-kpis mb-3">
 
+    <!-- Entity -->
+    <div class="meil-kpi-card entity-card">
+        <div class="kpi-topline">
+            <span class="kpi-icon">
+                <i class="fa-solid fa-building"></i>
+            </span>
+
+            <span class="kpi-label">ACTIVE ENTITY</span>
+
+            <span class="kpi-live-dot"></span>
+        </div>
+
+        <div class="kpi-value entity-name">
+            {{ selected_org.name }}
+        </div>
+
+        <div class="kpi-meta">
+            <span class="kpi-pill">
+                {{ selected_org.org_type.replace('_',' ').title() }}
+            </span>
+
+            <span class="kpi-meta-text">
+                Reporting hierarchy
+            </span>
+        </div>
+    </div>
+
+
+    <!-- Report Status -->
+    <div class="meil-kpi-card">
+        <div class="kpi-topline">
+            <span class="kpi-icon status-icon">
+                <i class="fa-solid fa-file-circle-check"></i>
+            </span>
+
+            <span class="kpi-label">REPORT STATUS</span>
+        </div>
+
+        <div class="kpi-value">
+            <span class="status-badge status-{{ (submission.status if submission else 'draft')|lower }}">
+                {{ submission.status if submission else 'DRAFT' }}
+            </span>
+        </div>
+
+        <div class="kpi-meta">
+            <span class="kpi-meta-text">
+                {{ selected_period.name }}
+            </span>
+        </div>
+    </div>
+
+
+    <!-- Period -->
+    <div class="meil-kpi-card">
+        <div class="kpi-topline">
+            <span class="kpi-icon period-icon">
+                <i class="fa-solid fa-calendar-check"></i>
+            </span>
+
+            <span class="kpi-label">REPORTING PERIOD</span>
+        </div>
+
+        <div class="kpi-value">
+            {{ selected_period.status }}
+        </div>
+
+        <div class="kpi-meta">
+            <span class="kpi-period">
+                {{ selected_period.name }}
+            </span>
+
+            <span class="kpi-meta-text">
+                Current cycle
+            </span>
+        </div>
+    </div>
+
+
+    <!-- Pending Reviews -->
+    <div class="meil-kpi-card">
+        <div class="kpi-topline">
+            <span class="kpi-icon review-icon">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </span>
+
+            <span class="kpi-label">PENDING REVIEWS</span>
+        </div>
+
+        <div class="kpi-value kpi-number">
+            {{ pending_reviews }}
+        </div>
+
+        <div class="kpi-meta">
+            {% if pending_reviews > 0 %}
+                <span class="kpi-warning">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    Attention required
+                </span>
+            {% else %}
+                <span class="kpi-success">
+                    <i class="fa-solid fa-circle-check me-1"></i>
+                    All clear
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+  
 <div class="row g-3 mb-3">
   <div class="col-12">
-    <div class="d-flex gap-2 flex-wrap">
+    <div class="dashboard-command-toolbar">
       <a href="{{ url_for('esg_entry', org_id=selected_org.id, period_id=selected_period.id) }}" class="btn btn-meil-primary btn-sm">
         <i class="fa-solid fa-pen-to-square me-1"></i>Open BRSR Disclosure Form
       </a>
@@ -105,9 +189,20 @@
 
 <div class="row g-3">
   <div class="col-lg-5">
-    <div class="card border-0 shadow-sm h-100">
+    <div class="meil-intelligence-card h-100">
       <div class="card-body">
-        <h6 class="fw-bold mb-3">E / S / G Pillar Contribution — {{ selected_period.name }}</h6>
+        <div class="intelligence-panel-header">
+    <div>
+        <span class="panel-eyebrow">ESG INTELLIGENCE</span>
+        <h5 class="panel-title">
+            E / S / G Performance
+        </h5>
+    </div>
+
+    <span class="panel-period">
+        {{ selected_period.name }}
+    </span>
+</div>
         <div class="dashboard-chart">
     <canvas id="pillarChart"></canvas>
 </div>
@@ -115,9 +210,20 @@
     </div>
   </div>
   <div class="col-lg-7">
-    <div class="card border-0 shadow-sm h-100">
+    <div class="meil-intelligence-card h-100">
       <div class="card-body">
-        <h6 class="fw-bold mb-3">GHG Emissions — Year-on-Year Trend (tCO2e)</h6>
+        <div class="intelligence-panel-header">
+    <div>
+        <span class="panel-eyebrow">CARBON INTELLIGENCE</span>
+        <h5 class="panel-title">
+            GHG Emissions Trend
+        </h5>
+    </div>
+
+    <span class="panel-period">
+        tCO₂e
+    </span>
+</div>
        <div class="dashboard-chart">
     <canvas id="trendChart"></canvas>
 </div>
@@ -128,7 +234,7 @@
 
 <div class="row g-3 mt-1">
   <div class="col-lg-4">
-    <div class="card border-0 shadow-sm h-100">
+    <div class="meil-intelligence-card h-100">
       <div class="card-body">
         <h6 class="fw-bold mb-3">YoY Comparison — E / S / G</h6>
         <div class="dashboard-chart">
@@ -137,17 +243,108 @@
       </div>
     </div>
   </div>
-  <div class="col-lg-8">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h6 class="fw-bold mb-3">Headline KPIs</h6>
-        <div class="row text-center g-3" id="headlineKpis">
-          <div class="col-6 col-md-3">
-            <div class="p-3 rounded kpi-tile">
-              <div class="small text-muted">GHG Emissions</div>
-              <div class="fs-5 fw-bold" id="kpi-ghg">—</div>
-              <div class="small text-muted">tCO2e</div>
+<div class="col-lg-8">
+    <div class="meil-kpi-intelligence h-100">
+
+        <div class="kpi-intelligence-header">
+            <div>
+                <span class="panel-eyebrow">ESG PERFORMANCE</span>
+
+                <h5 class="panel-title">
+                    <i class="fa-solid fa-chart-line me-2"></i>
+                    Headline KPIs
+                </h5>
             </div>
+
+            <span class="kpi-system-status">
+                LIVE DATA
+            </span>
+        </div>
+
+        <div class="meil-headline-kpis" id="headlineKpis">
+
+            <!-- GHG -->
+            <div class="headline-kpi">
+                <div class="headline-kpi-icon">
+                    <i class="fa-solid fa-smog"></i>
+                </div>
+
+                <div class="headline-kpi-info">
+                    <span class="headline-kpi-label">
+                        GHG Emissions
+                    </span>
+
+                    <strong id="kpi-ghg">—</strong>
+
+                    <span class="headline-kpi-unit">
+                        tCO2e
+                    </span>
+                </div>
+            </div>
+
+
+            <!-- Energy -->
+            <div class="headline-kpi">
+                <div class="headline-kpi-icon">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+
+                <div class="headline-kpi-info">
+                    <span class="headline-kpi-label">
+                        Energy Consumption
+                    </span>
+
+                    <strong id="kpi-energy">—</strong>
+
+                    <span class="headline-kpi-unit">
+                        GJ
+                    </span>
+                </div>
+            </div>
+
+
+            <!-- Water -->
+            <div class="headline-kpi">
+                <div class="headline-kpi-icon">
+                    <i class="fa-solid fa-droplet"></i>
+                </div>
+
+                <div class="headline-kpi-info">
+                    <span class="headline-kpi-label">
+                        Water Withdrawal
+                    </span>
+
+                    <strong id="kpi-water">—</strong>
+
+                    <span class="headline-kpi-unit">
+                        KL
+                    </span>
+                </div>
+            </div>
+
+
+            <!-- CSR -->
+            <div class="headline-kpi">
+                <div class="headline-kpi-icon">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+
+                <div class="headline-kpi-info">
+                    <span class="headline-kpi-label">
+                        CSR Spend
+                    </span>
+
+                    <strong id="kpi-csr">—</strong>
+
+                    <span class="headline-kpi-unit">
+                        INR Lakhs
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
           </div>
           <div class="col-6 col-md-3">
             <div class="p-3 rounded kpi-tile">
@@ -163,30 +360,32 @@
               <div class="small text-muted">KL</div>
             </div>
           </div>
-          <div class="col-6 col-md-3">
-            <div class="p-3 rounded kpi-tile">
-              <div class="small text-muted">CSR Spend</div>
-              <div class="fs-5 fw-bold" id="kpi-csr">—</div>
-              <div class="small text-muted">INR Lakhs</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+         
 <!-- ESG Intelligence -->
 <div class="row g-3 mt-1">
   <div class="col-lg-4">
-    <div class="card border-0 shadow-sm h-100">
+    <div class="meil-intelligence-card h-100">
       <div class="card-body">
-        <h6 class="fw-bold mb-3">
-          <i class="fa-solid fa-circle-check me-2 text-success"></i>
-          Data Completeness
-        </h6>
+       <div class="intelligence-panel-header">
+    <div>
+        <span class="panel-eyebrow">DATA QUALITY</span>
+
+        <h5 class="panel-title">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            Data Completeness
+        </h5>
+    </div>
+
+    <span class="panel-live-indicator">
+        LIVE
+    </span>
+</div>
 
         <div class="text-center py-2">
-          <div class="display-6 fw-bold" id="completeness-percentage">—</div>
+          <div class="completeness-display">
+    <span class="completeness-value" id="completeness-percentage">—</span>
+    <span class="completeness-symbol">%</span>
+</div>
          <div class="text-muted small" id="completeness-count">
            Checking consolidated metrics...
           </div> 
@@ -206,23 +405,33 @@
         </div>
 
         <div class="mt-3 small">
-          <div class="text-muted">Missing required metrics</div>
+          <div class="missing-metrics-header">
+    <span>
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        Missing Required Metrics
+    </span>
+
+    <span class="quality-alert-label">
+        DATA GAP
+    </span>
+</div>
           <ul id="missing-metrics" class="mb-0 mt-1">
             <li class="text-muted">Checking...</li>
           </ul>
         </div>
         <!-- Dashboard Notifications -->
-<div class="dashboard-notifications mt-4">
+<div class="dashboard-notifications meil-notification-panel mt-4">
 
   <div class="d-flex justify-content-between align-items-center mb-2">
 
   <div>
-    <h6 class="fw-bold mb-0">
-      <i class="fa-solid fa-bell me-2 text-primary"></i>
-      Notifications
-    </h6>
-  </div>
+    <span class="panel-eyebrow">SYSTEM ACTIVITY</span>
 
+    <h5 class="panel-title">
+        <i class="fa-solid fa-bell me-2"></i>
+        Notifications
+    </h5>
+</div>
   <div class="d-flex align-items-center gap-3">
 
 
@@ -333,22 +542,23 @@
   </div>
 
   <div class="col-lg-8">
-    <div class="card border-0 shadow-sm h-100">
+    <div class="meil-intelligence-card h-100">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-bold mb-0">
-            <i class="fa-solid fa-triangle-exclamation me-2 text-warning"></i>
-            ESG Intelligence — YoY Anomalies
-          </h6>
-          {% if current_user.role in ["SUPER_ADMIN", "GROUP_ESG_ADMIN", "SUBSIDIARY_ADMIN"] %}
-<button
-    type="button"
-    class="btn btn-sm btn-primary"
-    id="newNotificationBtn">
-    <i class="fa-solid fa-plus me-1"></i>
-    New notification
-</button>
-{% endif %}
+        <div class="intelligence-panel-header">
+    <div>
+        <span class="panel-eyebrow">ESG INTELLIGENCE</span>
+
+        <h5 class="panel-title">
+            <i class="fa-solid fa-brain me-2"></i>
+            YoY Anomaly Monitor
+        </h5>
+    </div>
+
+    <span class="panel-live-indicator">
+        AI MONITOR
+    </span>
+</div>
+          
           <span class="badge bg-light text-dark" id="anomaly-count">
             0 detected
           </span>
