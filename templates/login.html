@@ -1,54 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login — MEIL ESG / BRSR Portal</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b18">
+  <title>Access Portal | MEIL ESG Intelligence</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #070b18;
+      --panel: rgba(15, 24, 48, .82);
+      --cyan: #58f2ef;
+      --violet: #9b8cff;
+      --muted: #8998b6;
+      --white: #f3f7ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+      color: var(--white);
+      background:
+        radial-gradient(ellipse at 14% 20%, #172b59 0, transparent 36%),
+        radial-gradient(ellipse at 88% 80%, #261a55 0, transparent 36%),
+        var(--bg);
+      font-family: Inter, "Segoe UI", sans-serif;
+    }
+
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background-image:
+        linear-gradient(rgba(88,242,239,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(88,242,239,.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 92%);
+    }
+
+    .ambient::before,
+    .ambient::after {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      border: 1px solid rgba(88,242,239,.13);
+      border-radius: 50%;
+      animation: orbit 26s linear infinite;
+    }
+
+    .ambient::before {
+      top: -190px;
+      right: -110px;
+      box-shadow: 0 0 80px rgba(88,242,239,.08),
+                  inset 0 0 65px rgba(88,242,239,.04);
+    }
+
+    .ambient::after {
+      bottom: -240px;
+      left: -130px;
+      width: 450px;
+      height: 450px;
+      border-color: rgba(155,140,255,.18);
+      animation-direction: reverse;
+    }
+
+    @keyframes orbit {
+      to { transform: rotate(360deg); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 440px);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 27px;
+    }
+
+    .brand-mark {
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 17px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      color: var(--cyan);
+      font-size: 27px;
+      background: linear-gradient(145deg, #172b48, #10162d);
+      border: 1px solid rgba(88,242,239,.35);
+      box-shadow: 0 0 35px rgba(88,242,239,.12),
+                  inset 0 0 22px rgba(88,242,239,.06);
+      transform: rotate(-3deg);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(25px, 5vw, 32px);
+      font-weight: 750;
+      letter-spacing: -.8px;
+    }
+
+    .brand h1 span { color: var(--cyan); }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+    }
+
+    .login-card {
+      padding: clamp(25px, 6vw, 38px);
+      background: var(--panel);
+      border: 1px solid rgba(155,177,225,.18);
+      border-radius: 22px;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      box-shadow: 0 28px 90px rgba(0,0,0,.38),
+                  0 0 45px rgba(88,242,239,.045);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent);
+    }
+
+    .eyebrow {
+      color: var(--cyan);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .login-card h2 {
+      font-size: 25px;
+      font-weight: 700;
+      margin: 10px 0 7px;
+      letter-spacing: -.5px;
+    }
+
+    .intro {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .form-label {
+      color: #dce6fb;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 9px;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap > i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7185ab;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .form-control {
+      height: 49px;
+      color: var(--white);
+      background: rgba(5, 11, 27, .72);
+      border: 1px solid #283755;
+      border-radius: 10px;
+      padding-left: 43px;
+      font-size: 13px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .form-control::placeholder { color: #647493; }
+
+    .form-control:focus {
+      color: var(--white);
+      background: rgba(5, 11, 27, .9);
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(88,242,239,.10);
+    }
+
+    .password-toggle {
+      position: absolute;
+      top: 0;
+      right: 5px;
+      height: 49px;
+      width: 40px;
+      border: 0;
+      color: #8494b4;
+      background: transparent;
+    }
+
+    .password-toggle:hover { color: var(--cyan); }
+
+    .login-btn {
+      width: 100%;
+      min-height: 49px;
+      margin-top: 9px;
+      border: 0;
+      border-radius: 10px;
+      color: #071321;
+      font-weight: 750;
+      font-size: 13px;
+      letter-spacing: .3px;
+      background: linear-gradient(100deg, #58f2ef, #87dafa 55%, #a99aff);
+      box-shadow: 0 8px 25px rgba(88,242,239,.14);
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(88,242,239,.24);
+      color: #071321;
+    }
+
+    .login-btn:focus-visible,
+    .password-toggle:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 3px;
+    }
+
+    .security-note {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(155,177,225,.13);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .security-note i {
+      color: var(--cyan);
+      font-size: 16px;
+    }
+
+    .alert {
+      font-size: 12px;
+      border-radius: 9px;
+      overflow-wrap: anywhere;
+    }
+
+    .alert-danger {
+      color: #ffc1cc;
+      background: rgba(180,35,67,.15);
+      border: 1px solid rgba(255,90,125,.3);
+    }
+
+    .alert-success {
+      color: #a8ffe0;
+      background: rgba(26,160,119,.13);
+      border: 1px solid rgba(74,226,172,.3);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      color: #697996;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
 </head>
-<body class="login-body d-flex align-items-center justify-content-center">
-<div class="login-card shadow-lg">
-  <div class="text-center mb-4">
-    <i class="fa-solid fa-leaf fa-2x login-icon mb-2"></i>
-    <h3 class="fw-bold mb-0">MEIL Group</h3>
-    <p class="text-muted">ESG / BRSR Reporting Portal</p>
-  </div>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} py-2 small">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+<body>
+  <div class="ambient" aria-hidden="true"></div>
 
-  <form method="POST">
-    <div class="mb-3">
-      <label class="form-label">Username</label>
-      <input type="text" name="username" class="form-control" required autofocus>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Password</label>
-      <input type="password" name="password" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-meil-primary w-100">
-      <i class="fa-solid fa-right-to-bracket me-1"></i>Sign In
-    </button>
-  </form>
+  <main class="page">
+    <header class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <i class="fa-solid fa-leaf"></i>
+      </div>
+      <h1>MEIL <span>ESG</span></h1>
+      <p>Intelligence Platform</p>
+    </header>
 
-  <hr>
-  <div class="small text-muted">
-    <strong>Demo credentials</strong> (seeded via <code>seed_data.py</code>):
-    <ul class="mb-0 ps-3">
-      <li>adil / qwerty — Super Admin</li>
-      <li>group.esg.admin / Group@123 — Group ESG Admin</li>
-      <li>infra.admin / Infra@123 — Subsidiary Admin</li>
-      <li>klip.user / Klip@123 — Business Unit User</li>
-      <li>auditor / Audit@123 — Reviewer / Auditor</li>
-    </ul>
-  </div>
-</div>
+    <section class="login-card">
+      <div class="eyebrow">
+        <i class="fa-solid fa-circle-nodes me-1"></i>
+        Secure access gateway
+      </div>
+
+      <h2>Welcome back.</h2>
+      <p class="intro">
+        Sign in to access your ESG reporting workspace,
+        evidence controls and reporting intelligence.
+      </p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} py-2 mb-3" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" autocomplete="on">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <div class="input-wrap">
+            <i class="fa-regular fa-user" aria-hidden="true"></i>
+            <input
+              id="username"
+              type="text"
+              name="username"
+              class="form-control"
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+              autofocus>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              class="form-control"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+              style="padding-right: 48px;">
+            <button
+              class="password-toggle"
+              type="button"
+              id="togglePassword"
+              aria-label="Show password"
+              aria-pressed="false">
+              <i class="fa-regular fa-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn login-btn">
+          <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>
+          Authenticate &amp; Continue
+        </button>
+      </form>
+
+      <div class="security-note">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        <span>
+          Protected workspace. Access is restricted to authorised users.
+          Your session is handled securely by the application.
+        </span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      ESG REPORTING · EVIDENCE · INTELLIGENCE
+    </footer>
+  </main>
+
+  <script>
+    const password = document.getElementById("password");
+    const toggle = document.getElementById("togglePassword");
+
+    toggle.addEventListener("click", () => {
+      const showing = password.type === "password";
+      password.type = showing ? "text" : "password";
+      toggle.setAttribute("aria-pressed", String(showing));
+      toggle.setAttribute(
+        "aria-label",
+        showing ? "Hide password" : "Show password"
+      );
+      toggle.innerHTML = showing
+        ? '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>'
+        : '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
+    });
+  </script>
 </body>
 </html>
