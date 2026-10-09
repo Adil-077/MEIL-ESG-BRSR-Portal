@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+from google import genai
 import uuid
 from werkzeug.utils import secure_filename
 from datetime import datetime, timezone
@@ -34,6 +36,9 @@ from utils.consolidation import consolidate_org
 from utils.analytics import get_completeness, get_yoy_anomalies
 from utils.export_pdf import build_pdf_report
 from utils.export_excel import build_excel_report
+load_dotenv()
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -656,7 +661,7 @@ def esg_entry(org_id, period_id):
         can_edit = False
 
     evidences_by_esg_id = {r.id: r.evidences for r in rows}
-    
+
 
     return render_template(
         "esg_entry.html",
@@ -675,6 +680,7 @@ def esg_save(org_id, period_id):
     period = ReportingPeriod.query.get_or_404(period_id)
     submission = get_or_create_submission(org_id, period_id)
     section = request.form.get("section", "A")
+    print("SAVE DEBUG:", section, request.form.get("C_P5_HR_TRAINING"))
 
     if period.status == "CLOSED":
         flash("This reporting period is closed and cannot be edited.", "danger")
@@ -693,6 +699,7 @@ def esg_save(org_id, period_id):
     form_values = {code: request.form.get(code, "") for code in metric_defs}
 
     errors, clean_values = validate_batch(metric_defs, form_values)
+    print("SECTION C DEBUG:", form_values.get("C_P5_HR_TRAINING"), clean_values.get("C_P5_HR_TRAINING"))
 
     if errors:
         for code, msg in errors.items():
@@ -1555,10 +1562,214 @@ def ghg_activity():
     )
 
 
+
+@app.route("/api/ai/chat", methods=["POST"])
+@login_required
+def ai_chat():
+    data = request.get_json(silent=True) or {}
+    message = (data.get("message") or "").strip()
+
+    if not message:
+        return jsonify({"error": "Message is required."}), 400
+    if len(message) > 2000:
+        return jsonify({"error": "Message is too long."}), 400
+
+    # Resolve the requested organization and period.
+    accessible_ids = current_user.accessible_org_ids()
+    org_id = data.get("org_id")
+    period_id = data.get("period_id")
+
+    try:
+        org_id = int(org_id) if org_id is not None else None
+        period_id = int(period_id) if period_id is not None else None
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid organization or reporting period."}), 400
+
+    if org_id is None:
+        default_org = user_default_org()
+        org_id = default_org.id if default_org else None
+
+    if period_id is None:
+        default_period = latest_period()
+        period_id = default_period.id if default_period else None
+
+    if org_id is not None and org_id not in accessible_ids:
+        return jsonify({"error": "You do not have access to that organization."}), 403
+
+    org = Organization.query.get(org_id) if org_id else None
+    period = ReportingPeriod.query.get(period_id) if period_id else None
+
+    if period_id is not None and period is None:
+        return jsonify({"error": "Reporting period not found."}), 404
+
+    live_context = "LIVE PORTAL CONTEXT:\nNo organization or reporting period is selected."
+
+    if org and period:
+        catalog = SECTION_A + SECTION_B + (
+            SECTION_C
+            if org.org_type == "BUSINESS_UNIT"
+            else [m for m in SECTION_C if not m.get("rollup")]
+        )
+
+        rows = ESGData.query.filter_by(
+            org_id=org.id,
+            period_id=period.id
+        ).all()
+        rows_by_code = {row.metric_code: row for row in rows}
+
+        saved_metrics = [
+            {
+                "section": row.section,
+                "name": row.metric_name,
+                "code": row.metric_code,
+                "value": row.value,
+                "unit": row.unit,
+                "source": "consolidated" if row.is_consolidated else "entered"
+            }
+            for row in rows
+            if row.value is not None and row.value.strip()
+        ]
+
+
+        missing = [
+            metric["name"]
+            for metric in catalog
+            if metric.get("required")
+            and not (
+                rows_by_code.get(metric["code"])
+                and (rows_by_code[metric["code"]].value or "").strip()
+            )
+        ]
+
+        submission = ReportSubmission.query.filter_by(
+            org_id=org.id,
+            period_id=period.id
+        ).first()
+
+        evidence_rows = (
+            Evidence.query.join(ESGData)
+            .filter(
+                ESGData.org_id == org.id,
+                ESGData.period_id == period.id
+            )
+            .all()
+        )
+
+        evidence_counts = {"PENDING": 0, "VERIFIED": 0, "REJECTED": 0}
+        rejected_details = []
+
+        for evidence in evidence_rows:
+            status = (evidence.status or "PENDING").upper()
+            evidence_counts[status] = evidence_counts.get(status, 0) + 1
+
+            if status == "REJECTED":
+                rejected_details.append({
+                    "file": evidence.file_name,
+                    "metric": evidence.esg_data.metric_name,
+                    "comment": evidence.verification_comment or "No reason recorded"
+                })
+
+        # Include GHG evidence linked to activities for this org and period.
+        ghg_evidence_rows = (
+            GHGEvidence.query
+            .join(GHGActivity, GHGEvidence.ghg_activity_id == GHGActivity.id)
+            .filter(
+                GHGActivity.org_id == org.id,
+                GHGActivity.period_id == period.id
+            )
+            .all()
+        )
+
+        ghg_evidence_counts = {
+            "PENDING": 0,
+            "VERIFIED": 0,
+            "REJECTED": 0
+        }
+        ghg_rejected_details = []
+
+        for evidence in ghg_evidence_rows:
+            status = (evidence.status or "PENDING").upper()
+            ghg_evidence_counts[status] = (
+                ghg_evidence_counts.get(status, 0) + 1
+            )
+
+            if status == "REJECTED":
+                ghg_rejected_details.append({
+                    "file": evidence.file_name,
+                    "activity": (
+                        evidence.activity.activity_type
+                        if evidence.activity else "Unknown activity"
+                    ),
+                    "comment": (
+                        evidence.verification_comment
+                        or "No reason recorded"
+                    )
+                })
+
+
+        live_context = (
+
+            f"Organization: {org.name} (type: {org.org_type})\n"
+            f"Reporting period: {period.name}\n"
+            f"Saved ESG metric values: {saved_metrics}\n"
+            f"Use these saved values for metric questions; do not invent missing values.\n"
+            f"Report status: {submission.status if submission else 'DRAFT (not submitted)'}\n"
+            f"Required fields missing: {len(missing)} of {len(catalog)} applicable fields\n"
+            f"Missing required fields: {', '.join(missing) if missing else 'None'}\n"
+                        f"ESG evidence counts: {evidence_counts}\n"
+            f"Rejected ESG evidence details: {rejected_details}\n"
+            f"GHG evidence counts: {ghg_evidence_counts}\n"
+            f"Rejected GHG evidence details: {ghg_rejected_details}\n"
+        )
+
+    prompt = (
+        "You are MEIL ESG Copilot for an ESG and BRSR reporting portal.\n"
+        "Answer clearly, concisely, and professionally. Prefer useful bullets.\n"
+        "Use the supplied live portal context for organization-specific questions.\n"
+        "Never invent values, evidence, approvals, or statuses.\n"
+        "For missing required fields, list the exact field names from live context "
+        "and explain that users should enter valid values in the relevant section.\n"
+        "For rejected evidence, quote the recorded reviewer comment and recommend "
+        "reviewing it before correcting and re-uploading the document.\n"
+        "Do not invent rejection causes, required document formats, or approval steps "
+        "that are not confirmed by the live context.\n"
+        "Give practical next steps, but distinguish recommendations from confirmed "
+        "portal workflow actions.\n"
+        "Distinguish missing required fields from missing evidence: "
+        "the context lists required fields, but does not prove that every "
+        "field requires an uploaded evidence file.\n"
+        "Do not claim a report is approved merely because fields are complete.\n"
+        "Report workflow statuses mean: DRAFT = not yet submitted; "
+        "SUBMITTED = sent for review; UNDER_REVIEW = review has started; "
+        "VERIFIED = reviewer verification completed; APPROVED = final approval "
+        "completed; REJECTED = report was rejected and may be corrected and resubmitted.\n"
+        "Keep report status separate from evidence status. Verified evidence does "
+        "not mean the overall report is verified or approved.\n"
+        "Recommend the next action based on the actual report status and available "
+        "live context. Never claim an action has already happened unless confirmed.\n"
+        "If the live context is unavailable or insufficient, say so.\n"
+        "Aim for under 180 words unless more detail is requested.\n\n"
+        f"{live_context}\n"
+        f"User question:\n{message}"
+    )
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-flash-lite-latest",
+            contents=prompt
+        )
+        if response.text:
+            return jsonify({"reply": response.text})
+    except Exception:
+        app.logger.exception("Gemini live-data chat failed")
+
+    return jsonify({
+        "error": "The free AI service is temporarily unavailable. Please try again shortly."
+    }), 503
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
     app.run(debug=True, host="0.0.0.0", port=5000)
-
-

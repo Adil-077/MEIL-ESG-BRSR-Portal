@@ -39,7 +39,7 @@
         {{ '— ' if o.org_type=='SUBSIDIARY'
            else '—— ' if o.org_type=='BUSINESS_UNIT'
            else '' }}{{ o.name }}
-        
+
     </option>
 {% endfor %}
 </select>
@@ -163,7 +163,7 @@
     </div>
 
 </div>
-  
+
 <div class="row g-3 mb-3">
   <div class="col-12">
     <div class="dashboard-command-toolbar">
@@ -244,10 +244,11 @@
     </div>
   </div>
 <div class="col-lg-8">
-    <div class="meil-kpi-intelligence h-100">
+    <div class="meil-kpi-intelligence">
 
         <div class="kpi-intelligence-header">
             <div>
+
                 <span class="panel-eyebrow">ESG PERFORMANCE</span>
 
                 <h5 class="panel-title">
@@ -343,24 +344,90 @@
             </div>
 
         </div>
+        <!-- BRSR Readiness -->
+<div class="meil-readiness-card mt-3">
+
+    <div class="readiness-header">
+        <div>
+            <span class="panel-eyebrow">REPORTING READINESS</span>
+
+            <h5 class="panel-title">
+                <i class="fa-solid fa-shield-halved me-2"></i>
+                BRSR Readiness
+            </h5>
+        </div>
+
+        <span class="readiness-status">
+            <span class="readiness-dot"></span>
+            LIVE
+        </span>
+    </div>
+
+    <div class="readiness-grid">
+
+        <div class="readiness-item">
+            <span class="readiness-icon">
+                <i class="fa-solid fa-database"></i>
+            </span>
+            <div>
+                <div class="readiness-label">Data Completeness</div>
+                <div class="readiness-value" id="readiness-completeness">—</div>
+            </div>
+        </div>
+
+        <div class="readiness-item">
+            <span class="readiness-icon">
+                <i class="fa-solid fa-file-circle-check"></i>
+            </span>
+            <div>
+                <div class="readiness-label">Evidence Status</div>
+                <div class="readiness-value" id="readiness-evidence">—</div>
+            </div>
+        </div>
+
+        <div class="readiness-item">
+            <span class="readiness-icon">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </span>
+            <div>
+                <div class="readiness-label">Pending Reviews</div>
+                <div class="readiness-value" id="readiness-reviews">—</div>
+            </div>
+        </div>
+
+        <div class="readiness-item">
+            <span class="readiness-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </span>
+            <div>
+                <div class="readiness-label">Anomalies</div>
+                <div class="readiness-value" id="readiness-anomalies">—</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="readiness-progress">
+        <div class="readiness-progress-label">
+            <span>Overall reporting readiness</span>
+            <strong id="readiness-score">—</strong>
+        </div>
+
+        <div class="readiness-track">
+            <div
+                class="readiness-fill"
+                id="readiness-progress-bar"
+                style="width: 0%;">
+            </div>
+        </div>
+    </div>
+
+</div>
     </div>
 </div>
           </div>
-          <div class="col-6 col-md-3">
-            <div class="p-3 rounded kpi-tile">
-              <div class="small text-muted">Energy Consumption</div>
-              <div class="fs-5 fw-bold" id="kpi-energy">—</div>
-              <div class="small text-muted">GJ</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="p-3 rounded kpi-tile">
-              <div class="small text-muted">Water Withdrawal</div>
-              <div class="fs-5 fw-bold" id="kpi-water">—</div>
-              <div class="small text-muted">KL</div>
-            </div>
-          </div>
-         
+
+
 <!-- ESG Intelligence -->
 <div class="row g-3 mt-1">
   <div class="col-lg-4">
@@ -384,11 +451,11 @@
         <div class="text-center py-2">
           <div class="completeness-display">
     <span class="completeness-value" id="completeness-percentage">—</span>
-    <span class="completeness-symbol">%</span>
+
 </div>
          <div class="text-muted small" id="completeness-count">
            Checking consolidated metrics...
-          </div> 
+          </div>
 
            <div class="text-muted mt-2" style="font-size: 0.75rem;">
             Completeness is calculated for metrics currently supported by consolidation.
@@ -558,7 +625,7 @@
         AI MONITOR
     </span>
 </div>
-          
+
           <span class="badge bg-light text-dark" id="anomaly-count">
             0 detected
           </span>

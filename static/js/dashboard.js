@@ -38,6 +38,7 @@
 
       // ESG Intelligence
       renderCompleteness(data);
+      updateReadiness(data);
       renderAnomalies(data);
 
     })
@@ -378,7 +379,129 @@
   }
 }
   // =========================================================
+function updateReadiness(data) {
 
+    const completenessEl =
+        document.getElementById("readiness-completeness");
+
+    const evidenceEl =
+        document.getElementById("readiness-evidence");
+
+    const reviewsEl =
+        document.getElementById("readiness-reviews");
+
+    const anomaliesEl =
+        document.getElementById("readiness-anomalies");
+
+    const scoreEl =
+        document.getElementById("readiness-score");
+
+    const progressEl =
+        document.getElementById("readiness-progress-bar");
+
+
+    /* Data completeness */
+
+    const completeness =
+        Number(data.completeness?.percentage ?? 0);
+
+    if (completenessEl) {
+        completenessEl.textContent =
+            `${completeness.toFixed(1)}%`;
+    }
+
+
+    /* Pending reviews */
+
+    const pendingReviews =
+        Number(data.pending_reviews ?? 0);
+
+    if (reviewsEl) {
+        reviewsEl.textContent =
+            pendingReviews;
+    }
+
+
+    /* Anomalies */
+
+    const anomalyCount =
+        (data.anomalies || []).length;
+
+    if (anomaliesEl) {
+        anomaliesEl.textContent =
+            anomalyCount;
+    }
+
+
+    /* Evidence */
+
+    const evidence =
+        data.evidence || {};
+
+    if (evidenceEl) {
+
+        if (evidence.total !== undefined) {
+
+            const verified =
+                Number(evidence.verified ?? 0);
+
+            const total =
+                Number(evidence.total ?? 0);
+
+            evidenceEl.textContent =
+                `${verified}/${total}`;
+
+        } else {
+
+            evidenceEl.textContent = "—";
+
+        }
+    }
+
+
+    /* Overall readiness */
+
+    const evidenceTotal =
+        Number(evidence.total ?? 0);
+
+    const evidenceVerified =
+        Number(evidence.verified ?? 0);
+
+    const evidenceScore =
+        evidenceTotal > 0
+            ? (evidenceVerified / evidenceTotal) * 100
+            : 100;
+
+    const reviewScore =
+        pendingReviews === 0
+            ? 100
+            : Math.max(0, 100 - (pendingReviews * 20));
+
+    const anomalyScore =
+        anomalyCount === 0
+            ? 100
+            : Math.max(0, 100 - (anomalyCount * 15));
+
+
+    const readiness =
+        (
+            completeness +
+            evidenceScore +
+            reviewScore +
+            anomalyScore
+        ) / 4;
+
+
+    if (scoreEl) {
+        scoreEl.textContent =
+            `${Math.round(readiness)}%`;
+    }
+
+    if (progressEl) {
+        progressEl.style.width =
+            `${Math.max(0, Math.min(100, readiness))}%`;
+    }
+}
   function renderAnomalies(data) {
 
     const anomalies = data.anomalies || [];

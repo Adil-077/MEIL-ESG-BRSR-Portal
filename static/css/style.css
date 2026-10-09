@@ -2767,6 +2767,10 @@ html:not(.dark-mode) .dashboard-notification-item .text-muted {
 
 .meil-kpi-intelligence {
     position: relative;
+    .meil-kpi-intelligence {
+    height: fit-content;
+    min-height: 0;
+}
 
     padding: 1rem 1.1rem;
 
@@ -2936,4 +2940,560 @@ html:not(.dark-mode) .headline-kpi-unit {
     .meil-headline-kpis {
         grid-template-columns: 1fr;
     }
+}
+/* =========================================================
+   MEIL BRSR READINESS PANEL
+   ========================================================= */
+
+.meil-readiness-card {
+    position: relative;
+
+    padding: 0.9rem 1rem;
+
+    border: 1px solid rgba(100, 170, 255, 0.10);
+    border-radius: 14px;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(60, 150, 255, 0.045),
+            transparent 38%
+        ),
+        rgba(255, 255, 255, 0.018);
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.readiness-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 0.75rem;
+}
+
+.readiness-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 3px 7px;
+
+    border: 1px solid rgba(60, 190, 130, 0.18);
+    border-radius: 6px;
+
+    color: #6dd3a5;
+
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+
+.readiness-dot {
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #62d39d;
+
+    box-shadow: 0 0 8px rgba(98, 211, 157, 0.7);
+
+    animation: readinessPulse 2s infinite;
+}
+
+@keyframes readinessPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.readiness-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+}
+
+.readiness-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    min-width: 0;
+
+    padding: 7px 8px;
+
+    border: 1px solid rgba(100, 170, 255, 0.06);
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.018);
+}
+
+.readiness-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 25px;
+    height: 25px;
+
+    flex: 0 0 25px;
+
+    border-radius: 7px;
+
+    background: rgba(70, 150, 255, 0.07);
+
+    color: #6db2f3;
+
+    font-size: 0.62rem;
+}
+
+.readiness-label {
+    color: #7e92a6;
+
+    font-size: 0.56rem;
+    line-height: 1.1;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.readiness-value {
+    margin-top: 2px;
+
+    color: #edf5fd;
+
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.readiness-progress {
+    margin-top: 0.75rem;
+}
+
+.readiness-progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 5px;
+
+    color: #71869b;
+
+    font-size: 0.58rem;
+}
+
+.readiness-progress-label strong {
+    color: #8ec5ff;
+
+    font-size: 0.68rem;
+}
+
+.readiness-track {
+    height: 5px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: rgba(100, 170, 255, 0.08);
+}
+
+.readiness-fill {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: linear-gradient(
+        90deg,
+        #347dcc,
+        #68b2ff
+    );
+
+    box-shadow: 0 0 10px rgba(80, 160, 255, 0.25);
+
+    transition: width 0.8s ease;
+}
+
+/* Light mode */
+
+html:not(.dark-mode) .meil-readiness-card {
+    background: #ffffff;
+
+    border-color: rgba(30, 100, 180, 0.09);
+
+    box-shadow: 0 7px 22px rgba(30, 80, 140, 0.05);
+}
+
+html:not(.dark-mode) .readiness-item {
+    background: #f7faff;
+
+    border-color: rgba(30, 100, 180, 0.06);
+}
+
+html:not(.dark-mode) .readiness-label {
+    color: #63778b;
+}
+
+html:not(.dark-mode) .readiness-value {
+    color: #1d3047;
+}
+
+html:not(.dark-mode) .readiness-progress-label {
+    color: #718499;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+    .readiness-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .readiness-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ESG Section C metric layout */
+.metric-row {
+    align-items: center;
+}
+
+.metric-row > .metric-name-col {
+    min-width: 0;
+}
+
+.metric-row > .metric-value-col {
+    min-width: 160px;
+}
+
+.metric-row > .metric-unit-col {
+    min-width: 70px;
+    white-space: nowrap;
+}
+
+.metric-row > .col-md-4 {
+    min-width: 0;
+}
+/* =========================================================
+   MEIL ESG COPILOT
+   ========================================================= */
+
+.ai-copilot-button {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 12px 18px;
+    border: 1px solid rgba(0, 255, 200, 0.45);
+    border-radius: 14px;
+
+    background: rgba(8, 18, 28, 0.94);
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.35),
+        0 0 18px rgba(0, 255, 200, 0.12);
+
+    backdrop-filter: blur(12px);
+
+    transition: all 0.2s ease;
+}
+
+.ai-copilot-button:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 255, 200, 0.8);
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.45),
+        0 0 25px rgba(0, 255, 200, 0.2);
+}
+
+.ai-copilot-icon {
+    font-size: 18px;
+}
+
+
+/* Chat panel */
+
+.ai-copilot-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 82px;
+    z-index: 10000;
+
+    width: 390px;
+    height: 570px;
+
+    display: none;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(0, 255, 200, 0.28);
+    border-radius: 18px;
+
+    background: rgba(7, 15, 24, 0.97);
+    color: #ffffff;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.55),
+        0 0 35px rgba(0, 255, 200, 0.08);
+
+    backdrop-filter: blur(18px);
+}
+
+.ai-copilot-panel.open {
+    display: flex;
+}
+
+
+/* Header */
+
+.ai-copilot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 17px 18px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-copilot-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.ai-copilot-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 5px;
+
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+    letter-spacing: 0.7px;
+}
+
+.ai-status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+    background: #00ffc8;
+
+    box-shadow: 0 0 8px rgba(0, 255, 200, 0.8);
+}
+
+#aiCopilotClose {
+    width: 30px;
+    height: 30px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+
+    font-size: 21px;
+    cursor: pointer;
+}
+
+
+/* Messages */
+
+.ai-chat-messages {
+    flex: 1;
+
+    padding: 18px;
+
+    overflow-y: auto;
+}
+
+.ai-message {
+    max-width: 88%;
+
+    margin-bottom: 12px;
+    padding: 11px 13px;
+
+    border-radius: 12px;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ai-message p {
+    margin: 5px 0 0;
+}
+
+.ai-message-bot {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ai-message-user {
+    margin-left: auto;
+
+    background: rgba(0, 255, 200, 0.12);
+    border: 1px solid rgba(0, 255, 200, 0.2);
+}
+
+
+/* Quick prompts */
+
+.ai-quick-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    padding: 10px 14px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ai-quick-prompts button {
+    padding: 6px 9px;
+
+    border: 1px solid rgba(0, 255, 200, 0.18);
+    border-radius: 8px;
+
+    background: rgba(0, 255, 200, 0.05);
+    color: rgba(255, 255, 255, 0.75);
+
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.ai-quick-prompts button:hover {
+    background: rgba(0, 255, 200, 0.12);
+    color: #ffffff;
+}
+
+
+/* Input */
+
+.ai-chat-input-area {
+    display: flex;
+    gap: 8px;
+
+    padding: 12px 14px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#aiChatInput {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 10px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+
+    outline: none;
+
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+
+    font-size: 12px;
+}
+
+#aiChatInput::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+}
+
+#aiChatSend {
+    padding: 10px 13px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: #00ffc8;
+    color: #061219;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+#aiChatSend:hover {
+    opacity: 0.85;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .ai-copilot-panel {
+        right: 10px;
+        bottom: 76px;
+
+        width: calc(100vw - 20px);
+        height: 70vh;
+    }
+
+    .ai-copilot-button {
+        right: 12px;
+        bottom: 12px;
+    }
+}
+/* MEIL ESG Copilot — polished response formatting */
+.ai-message-content {
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.ai-message-content p {
+    margin: 8px 0;
+}
+
+.ai-message-content p:first-child {
+    margin-top: 6px;
+}
+
+.ai-message-content ul,
+.ai-message-content ol {
+    margin: 8px 0 12px;
+    padding-left: 22px;
+}
+
+.ai-message-content li {
+    margin-bottom: 5px;
+}
+
+.ai-message-content strong {
+    color: #7dd3fc;
+}
+
+.ai-message-content h1,
+.ai-message-content h2,
+.ai-message-content h3 {
+    font-size: 14px;
+    margin: 12px 0 6px;
 }

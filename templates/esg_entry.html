@@ -124,20 +124,21 @@
             {% for m in metrics %}
               {% set entry = values.get(m.code) %}
               {% set readonly_rollup = (not is_bu) and m.get('rollup') %}
-              <div class="row metric-row align-items-center" id="metric-{{ m.code }}">
-                <div class="col-md-5">
+              <div class="row metric-row align-items-center gx-3" id="metric-{{ m.code }}">
+                <div class="col-md-5 metric-name-col">
                   {{ m.name }}
                   {% if entry and entry.is_consolidated %}<span class="badge bg-primary consolidated-badge ms-1">Consolidated</span>{% endif %}
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2 metric-value-col">
                   <input type="text"
        name="{{ m.code }}"
        class="form-control form-control-sm"
        value="{{ entry.value if entry else '' }}"
-       {% if (not can_edit) or readonly_rollup %}disabled{% endif %}>
+       {% if readonly_rollup %}disabled{% endif %}
+       >
                 </div>
-                <div class="col-md-1 text-muted small">{{ m.get('unit','') }}</div>
-                <div class="col-md-4">
+                <div class="col-md-1 text-muted small metric-unit-col">{{ m.get('unit','') }}</div>
+                <div class="col-md-4 evidence-column">
                   {% if entry %}
 
   <div class="d-flex align-items-center gap-2 flex-wrap">
