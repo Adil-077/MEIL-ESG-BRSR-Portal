@@ -1450,8 +1450,9 @@ def ghg_activity():
         if org_id not in current_user.accessible_org_ids():
             abort(403)
 
-        if scope != "SCOPE2":
-            flash("Only Scope 2 is currently supported.", "warning")
+        
+        if scope not in {"SCOPE1", "SCOPE2", "SCOPE3"}:
+            flash("Please select a valid emission scope.", "danger")
             return redirect(
                 url_for(
                     "ghg_activity",
@@ -1459,6 +1460,7 @@ def ghg_activity():
                     period_id=period_id
                 )
             )
+
 
         if not activity_type:
             flash("Please select an activity type.", "danger")
@@ -1470,8 +1472,8 @@ def ghg_activity():
                 )
             )
 
-            if activity_value is None or activity_value < 0:
-              flash("Activity value must be zero or greater.", "danger")
+        if activity_value is None or activity_value < 0:
+            flash("Activity value must be zero or greater.", "danger")
             return redirect(
                 url_for(
                     "ghg_activity",
@@ -1495,19 +1497,9 @@ def ghg_activity():
             activity_type=activity_type,
             active=True
         ).first()
+        
 
-        if not factor:
-            flash(
-                "No active emission factor is available for this activity.",
-                "danger"
-            )
-            return redirect(
-                url_for(
-                    "ghg_activity",
-                    org_id=org_id,
-                    period_id=period_id
-                )
-            )
+        
 
         # Convert kWh to MWh when necessary
         calculation_value = activity_value

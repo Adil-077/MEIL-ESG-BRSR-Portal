@@ -106,7 +106,17 @@
                             Select scope
                         </option>
 
-                        <option value="SCOPE2">
+                        <option value="SCOPE1">
+    Scope 1 — Direct Emissions
+</option>
+
+<option value="SCOPE2">
+    Scope 2 — Indirect Energy Emissions
+</option>
+
+<option value="SCOPE3">
+    Scope 3 — Other Indirect Value-Chain Emissions
+</option>
                             Scope 2 — Indirect Energy Emissions
                         </option>
 
@@ -122,21 +132,19 @@
                         Activity Type
                     </label>
 
-                    <select
-                        name="activity_type"
-                        class="form-select"
-                        required
-                    >
-
-                        <option value="">
-                            Select activity
-                        </option>
-
-                        <option value="PURCHASED_ELECTRICITY">
-                            Purchased Electricity
-                        </option>
-
-                    </select>
+                
+<select
+    name="activity_type"
+    id="activity_type"
+    class="form-select"
+    required
+>
+    <option value="">Select activity</option>
+    <option value="PURCHASED_ELECTRICITY">Purchased Electricity (Scope 2)</option>
+    <option value="STATIONARY_COMBUSTION">Stationary Fuel Combustion (Scope 1)</option>
+    <option value="COMPANY_VEHICLES">Company Vehicles / Fuel (Scope 1)</option>
+    <option value="VALUE_CHAIN_TRANSPORT">Value-Chain Transportation (Scope 3)</option>
+</select>
 
                 </div>
 
@@ -444,4 +452,44 @@
     </div>
 
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const scopeSelect = document.querySelector('select[name="scope"]');
+console.log("Scope dropdown found:", scopeSelect);
+    const activitySelect = document.getElementById("activity_type");
+
+    if (!scopeSelect || !activitySelect) {
+    console.error("Scope or activity dropdown not found");
+    return;
+}
+
+    const activities = {
+        SCOPE1: [
+            ["STATIONARY_COMBUSTION", "Stationary Fuel Combustion"],
+            ["COMPANY_VEHICLES", "Company Vehicles / Fuel"]
+        ],
+        SCOPE2: [
+            ["PURCHASED_ELECTRICITY", "Purchased Electricity"]
+        ],
+        SCOPE3: [
+            ["VALUE_CHAIN_TRANSPORT", "Value-Chain Transportation"]
+        ]
+    };
+
+    function updateActivities() {
+        const scope = scopeSelect.value;
+        activitySelect.innerHTML = '<option value="">Select activity</option>';
+
+        (activities[scope] || []).forEach(function (item) {
+            const option = document.createElement("option");
+            option.value = item[0];
+            option.textContent = item[1];
+            activitySelect.appendChild(option);
+        });
+    }
+
+    scopeSelect.addEventListener("change", updateActivities);
+    updateActivities();
+});
+</script>
 {% endblock %}
